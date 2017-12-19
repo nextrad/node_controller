@@ -14,7 +14,9 @@ SOURCES += \
     connection_manager.cpp \
     video_connection_manager.cpp \
     networkmanager.cpp \
-    window.cpp
+    window.cpp \
+    datetime.cpp \
+    header_arm_files.cpp
 
 HEADERS += \
     window.h \
@@ -22,4 +24,6 @@ HEADERS += \
     parameters.h \
     includes.h \
     video_connection_manager.h \
-    networkmanager.hpp
+    networkmanager.hpp \
+    header_arm_files.h \
+    datetime.h

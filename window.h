@@ -17,6 +17,8 @@
 #include "networkmanager.hpp"
 #include "includes.h"
 #include "parameters.h"
+#include "datetime.h"
+#include "header_arm_files.h"
 
 class QPushButton;
 class Window : public QWidget
@@ -42,8 +44,8 @@ class Window : public QWidget
         QLabel *countDownLabel;
         ConnectionManager connectionManager;
         VideoConnectionManager videoRecorder;
-        QTimer *timer;
-        QTimer *timer1;
+        QTimer *starttimer;
+        QTimer *endtimer;
         QTimer *countDownTim;
         string startTime;
         string endTime;
@@ -60,7 +62,7 @@ class Window : public QWidget
         void updateCountDownLCD(void);
         void startRecording(void);
         void stopRecording(void);
-        void startVideoRecordingCountDownButtonClicked(void);
+        void CountDownButtonClicked(void);  //startVideoRecordingCountDownButtonClicked
         void abortVideoRecordingButtonClicked(void);
         void showVideoButtonClicked(void);
         void startSoundButtonClicked(void);

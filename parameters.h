@@ -26,6 +26,8 @@
 
 #define IS_MOSAIC_MODE		true
 
+#define H_FILE_LENGTH       112
+
 
 // parameters that are set in main.cpp
 extern int NODE_ID;

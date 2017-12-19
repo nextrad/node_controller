@@ -41,15 +41,15 @@ Window::Window(QWidget *parent) : QWidget(parent)
     videoRecorder.connectToSocket();
     videoRecorder.configureVideoStream();
 
-    //Set up timers for start and end recording and update countdown clock
+    //Set up starttimers for start and end recording and update countdown clock
     stopUnixTime = time(NULL);
-    timer = new QTimer(this);
-    timer->setSingleShot(true);
-    connect(timer, SIGNAL(timeout()), this, SLOT(startRecording()));
+    starttimer = new QTimer(this);
+    starttimer->setSingleShot(true);
+    connect(starttimer, SIGNAL(timeout()), this, SLOT(startRecording()));
 
-    timer1 = new QTimer(this);
-    timer1->setSingleShot(true);
-    connect(timer1, SIGNAL(timeout()), this, SLOT(stopRecording()));
+    endtimer = new QTimer(this);
+    endtimer->setSingleShot(true);
+    connect(endtimer, SIGNAL(timeout()), this, SLOT(stopRecording()));
 
     countDownTim = new QTimer(this);
     countDownTim->setInterval(1000);
@@ -83,7 +83,7 @@ void Window::initGUI(void)
 
     //Status output box for text output
     statusBox = new QTextEdit(this);
-    statusBox->setGeometry(170, 70, 415, 180);
+    statusBox->setGeometry(170, 70, 415, 200); //180);
 
     //countdown LCD number set to bottom right
     countDown = new QLCDNumber(8, this);
@@ -104,17 +104,17 @@ void Window::initGUI(void)
     showVideoButton = new QPushButton("Show Video\nFeed", this);
     showVideoButton->setGeometry(15, 120, 140, 50);
     connect(showVideoButton, SIGNAL (clicked(bool)), this, SLOT(showVideoButtonClicked(void)));
-
-    //button for starting countdown timer for video recording
+/*
+    //button for starting countdown starttimer for video recording
     startVideoRecButton = new QPushButton("Countdown to\nVideo Recording", this);
     startVideoRecButton->setGeometry(15, 170, 140, 50);
-    connect(startVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(startVideoRecordingCountDownButtonClicked(void)));
-
+    connect(startVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(CountDownButtonClicked(void)));
+*/
     //button to abort the video recording
-    abortVideoRecButton = new QPushButton("Stop\nVideo Recording", this);
+    abortVideoRecButton = new QPushButton("Abort\nVideo Recording", this);
     abortVideoRecButton->setGeometry(15, 220, 140, 50);
     connect(abortVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(abortVideoRecordingButtonClicked(void)));
-
+/*
     //button to start sound
     startSoundButton = new QPushButton("Start\nVideo Recording", this);
     startSoundButton->setGeometry(15, 270, 140, 50);
@@ -124,7 +124,7 @@ void Window::initGUI(void)
     stopSoundButton = new QPushButton("Start\nSound", this);
     stopSoundButton->setGeometry(15, 320, 140, 50);
     connect(stopSoundButton, SIGNAL (clicked(bool)), this, SLOT(stopSoundButtonClicked(void)));
-
+*/
     //    //button for starting pedestal controller program
 //    startPedControlButton = new QPushButton("Start Pedestal\nController", this);
 //    startPedControlButton->setGeometry(15, 310, 140, 50);
@@ -213,7 +213,7 @@ void Window::recvGPSDetailsButtonClicked(void)
     if(client.isServerConnected())
     {
         client.receivePosition();
-    }
+    }11
     else
     {
         statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Not Running");
@@ -245,16 +245,16 @@ void Window::recvHFileButtonClicked(void)
 //=======================================================================
 void Window::abortVideoRecordingButtonClicked(void)
 {
-    //in 'countdown to start' mode only the timer needs to be stopped
+    //in 'countdown to start' mode only the starttimer needs to be stopped
     if(timMode == 1)
     {
-        timer->stop();
+        starttimer->stop();
     }
-    //in 'countdown to end' mode the timer must be stopped as well as the recording
+    //in 'countdown to end' mode the starttimer must be stopped as well as the recording
     else if(timMode == 2)
     {
         stopRecording();
-        timer1->stop();
+        endtimer->stop();
     }
     timMode = 0;
     countDownLabel->setText("Video recording aborted!");
@@ -277,16 +277,16 @@ void Window::startSoundButtonClicked(void)
 //=======================================================================
 void Window::stopSoundButtonClicked(void)
 {
-    //in 'countdown to start' mode only the timer needs to be stopped
+    //in 'countdown to start' mode only the starttimer needs to be stopped
     if(timMode == 1)
     {
-        timer->stop();
+        starttimer->stop();
     }
-    //in 'countdown to end' mode the timer must be stopped as well as the recording
+    //in 'countdown to end' mode the starttimer must be stopped as well as the recording
     else if(timMode == 2)
     {
         stopRecording();
-        timer1->stop();
+        endtimer->stop();
     }
     timMode = 0;
     countDownLabel->setText("Video recording aborted!");
@@ -327,6 +327,7 @@ void Window::updateCountDownLCD(void)
 //Calculates the hours minutes and seconds remaining for countdown
 QString Window::getCountDownTime(time_t timeLeft)
 {
+    /*
     //Convert from unix time to hours, minutes, seconds
     int tim = (int) timeLeft;
     int hours, mins, secs;
@@ -336,14 +337,17 @@ QString Window::getCountDownTime(time_t timeLeft)
     mins = tim % 60;
     tim -= mins;
     hours = tim / 60;
-/* ToDo
+*/
     //convert to QString to make easier to output
+/*
     QString temp = QStringLiteral("%1:").arg(hours, 2, 10, QChar('0'));
     temp.append(QStringLiteral("%1").arg(mins, 2, 10, QChar('0')));
     temp.append(QStringLiteral(":%1").arg(secs, 2, 10, QChar('0')));
     return temp;
-    */
-    QString temp = "20:11:06";
+*/
+
+    Datetime datetime;
+    QString temp = datetime.getCountDownTime(timeLeft); //"%d.%m.%Y_%I:%M:%S");
     return temp;
 
 }
@@ -393,6 +397,25 @@ void Window::connectionTestButtonClicked(void)
         testConnectionButton->setText("Not connected");
         testConnectionButton->setStyleSheet("* { background-color: rgb(255,125,100) }");
     }
+/*
+    // Poll for new Header file
+    if ((connectionManager.isConnected()) && (client.isServerConnected()))
+    {
+        struct timeval tv;
+
+        // Read Header file
+        ifstream headerFile;
+        headerFile.open("NeXtRAD_Header.txt");
+        printf("Header File opened\n");
+        while(!headerFile.open())
+        {
+            tv.tv_usec = 200; //delay
+        }
+        headerFile.close();
+        CountDownButtonClicked ();
+
+    }
+*/
 }
 
 
@@ -430,8 +453,8 @@ string Window::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 //=======================================================================
 // startVideoRecordingCountDown()
 //=======================================================================
-//This method parses the start and end times for the video recording and starts the countdown timer
-void Window::startVideoRecordingCountDownButtonClicked(void)
+//This method parses the start and end times for the video recording and starts the countdown starttimer
+void Window::CountDownButtonClicked(void)
 {
     //Read start and end times from header file
     ifstream headerFile;
@@ -525,7 +548,7 @@ void Window::startVideoRecordingCountDownButtonClicked(void)
     }
     else
     {
-        timer->start((convertToUnixTime(startTime)+ 2 - currentUnixTime)*1000);
+        starttimer->start((convertToUnixTime(startTime)+ 2 - currentUnixTime)*1000);
         //camera buffer stores 2 seconds, thus start two seconds later and record for 2 seconds longer.
         countDownLabel->setText("Video recording starts in...");
         timMode = 1;
@@ -539,12 +562,12 @@ void Window::startVideoRecordingCountDownButtonClicked(void)
 //=======================================================================
 // startRecording()
 //=======================================================================
-//Method to start video recording nd starts the countdown until the end of experiment
+//Method to start video recording and starts the countdown until the end of experiment
 void Window::startRecording(void)
 {
     timMode = 2;
     videoRecorder.startRecording();
-    timer1->start((stopUnixTime - currentUnixTime)*1000);
+    endtimer->start((stopUnixTime - currentUnixTime)*1000);
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording started");
     countDownLabel->setText("Video recording ends in...");
 }
