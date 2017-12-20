@@ -7,6 +7,7 @@
 #define DATETIME_H
 
 #include <QDateTime>
+#include <iomanip>
 #include "includes.h"
 #include "parameters.h"
 
@@ -18,7 +19,14 @@ class Datetime
     public:
         Datetime(void);
         string getTimeAndDate(const char *format);
-        string nowPlusSecs(int secs);
+        string getNowPlusSecs(int secs);
+        string getNowSecsPlusSecs(int secs);
+        string getNowInYears(void);
+        string getNowInMonths(void);
+        string getNowInDays(void);
+        string getNowInHours(void);
+        string getNowInMinutes(void);
+        string getNowInSeconds(void);
         QString getCountDownTime(time_t timeLeft);
         time_t convertToUnixTime(string timestamp);
 };

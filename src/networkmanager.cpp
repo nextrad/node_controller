@@ -6,6 +6,8 @@
 
 #include "networkmanager.hpp"
 
+extern int NODE_ID;
+
 NetworkManager::NetworkManager()
 {
     serverAddress = CNC_ADDRESS; //address of server to connect to (127.0.0.1 is localhost or the current machine)

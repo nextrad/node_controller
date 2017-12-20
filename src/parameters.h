@@ -1,38 +1,44 @@
-//Author:               Darryn Jordan
-//Edited By:            David Bissett
-//Edited By:            Shirley Coetzee
-//File:                 parameters.h
-//For:                  University of Cape Town, Dept. Elec. Eng., RRSG NeXtRAD
-//Created:              November 2015
-//Last Edited:          April 2016
-//Last Edited:          January 2017
+//Author:       Darryn Jordan
+//Edited By:    David Bissett
+//File:         parameters.h
+//For:          University of Cape Town, Dept. Elec. Eng., RRSG NeXtRAD
+//Created:      November 2015
+//Revision:     1.0 (June 2016)
+//Edited By:    Shirley Coetzee and Darryn Jordan
+//Revision:     2.0 (Dec 2017)
 
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
-#include <string.h>
+enum WritePrivacy {PUBLIC, PRIVATE};
 
 #define SOCKET_BUFFER_SIZE 	300
-
-#define CNC_ADDRESS         "192.168.1.100"
+#define CNC_ADDRESS          "192.168.1.100"
 #define SSH_PORT            22
 #define TELNET_HOST 		"127.0.0.1"
 #define TELNET_PORT 		4212
+#define AUDIO_TELNET_PORT   5038
 #define TELNET_PASSWORD		"vlc"
 
 #define RTSP_PORT			"88"
 
-#define CAMERA_RESOLUTION 	1080
+#define CAMERA_RESOLUTION 	480
 
 #define IS_MOSAIC_MODE		true
-
 #define H_FILE_LENGTH       112
 
+#define HEADER_FILE         "NeXtRAD.ini"
+#define CNC_HEADER_PATH     "/home/nextrad/Documents/cnc_controller/NeXtRAD.ini"
+#define NODE_HEADER_PATH    "/home/nextrad/Documents/node_controller/NeXtRAD.ini"
 
-// parameters that are set in main.cpp
-extern int NODE_ID;
-extern std::string RTSP_HOST;
-extern std::string OUTPUT_DIRECTORY;
-extern std::string OVERLAY_IMAGE;
+#define ARMTIMECFG_FILE     "armtime.cfg"
+#define ARMTIMECFG_PATH     "/home/nextrad/Documents/cnc_controller/armtime.cfg"
+
+#define ICON_PATH           "../media/icons/favicon2.ico"
+#define TONES_PATH           "../media/tones/"
+
+#define STARTTIMESECS       20
+#define ENDTIMESECS         120
+
 
 #endif // PARAMETERS_H

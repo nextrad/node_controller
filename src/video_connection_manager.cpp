@@ -7,6 +7,9 @@
 
 #include "video_connection_manager.h"
 
+extern string OUTPUT_DIRECTORY;
+extern string RTSP_HOST;
+
 
 VideoConnectionManager::VideoConnectionManager(void)  : socket(service)
 {

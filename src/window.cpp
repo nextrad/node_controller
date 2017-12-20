@@ -8,7 +8,8 @@
 //Revision:             2.0 (October 2016)
 //Edited By:            Shirley Coetzee and Darryn Jordan and Dane Du Plessis
 //Revision:             3.0 (Jan/Feb 2017)
-
+//Edited By:            Shirley Coetzee and Darryn Jordan
+//Revision:             4.0 (Dec 2017)
 
 //=======================================================================
 // Includes
@@ -19,13 +20,17 @@
 #include <QApplication>
 #include <QDateTime>
 
+extern int NODE_ID;
+extern string RTSP_HOST;
+extern string OVERLAY_IMAGE;
+extern string OUTPUT_DIRECTORY;
 
 //=======================================================================
 // Constructor
 //=======================================================================
 Window::Window(QWidget *parent) : QWidget(parent)
 {
-    timMode = 0; //count down mode
+    timeMode = timeState::inactive; //count down mode
 
     //Set size of window
     setMinimumSize(600,400); //FixedSize(600,400);
@@ -100,45 +105,37 @@ void Window::initGUI(void)
 //    startPedControlButton->setGeometry(15, 120, 140, 50);
 //    connect(startPedControlButton, SIGNAL (clicked(bool)), this, SLOT(startPedControlButtonClicked(void)));
 
-    //button to show the video recording
-    showVideoButton = new QPushButton("Show Video\nFeed", this);
-    showVideoButton->setGeometry(15, 120, 140, 50);
-    connect(showVideoButton, SIGNAL (clicked(bool)), this, SLOT(showVideoButtonClicked(void)));
+    //button for receiving node's position
+    recvGPSDetailsButton = new QPushButton("Receive Node\nDetails", this);
+    recvGPSDetailsButton->setGeometry(15, 120, 140, 50);
+    connect(recvGPSDetailsButton, SIGNAL (clicked(bool)), this, SLOT(recvGPSDetailsButtonClicked(void)));
 /*
     //button for starting countdown starttimer for video recording
     startVideoRecButton = new QPushButton("Countdown to\nVideo Recording", this);
     startVideoRecButton->setGeometry(15, 170, 140, 50);
     connect(startVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(CountDownButtonClicked(void)));
 */
+    //button to show the video recording
+    showVideoButton = new QPushButton("Show Video\nFeed", this);
+    showVideoButton->setGeometry(15, 170, 140, 50);
+    connect(showVideoButton, SIGNAL (clicked(bool)), this, SLOT(showVideoButtonClicked(void)));
+
     //button to abort the video recording
     abortVideoRecButton = new QPushButton("Abort\nVideo Recording", this);
     abortVideoRecButton->setGeometry(15, 220, 140, 50);
     connect(abortVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(abortVideoRecordingButtonClicked(void)));
 /*
     //button to start sound
-    startSoundButton = new QPushButton("Start\nVideo Recording", this);
+    startSoundButton = new QPushButton("Start\nSound", this);
     startSoundButton->setGeometry(15, 270, 140, 50);
     connect(startSoundButton, SIGNAL (clicked(bool)), this, SLOT(startSoundButtonClicked(void)));
 
     //button to stop sound
-    stopSoundButton = new QPushButton("Start\nSound", this);
+    stopSoundButton = new QPushButton("Stop\nSound", this);
     stopSoundButton->setGeometry(15, 320, 140, 50);
     connect(stopSoundButton, SIGNAL (clicked(bool)), this, SLOT(stopSoundButtonClicked(void)));
+
 */
-    //    //button for starting pedestal controller program
-//    startPedControlButton = new QPushButton("Start Pedestal\nController", this);
-//    startPedControlButton->setGeometry(15, 310, 140, 50);
-//    connect(startPedControlButton, SIGNAL (clicked(bool)), this, SLOT(startPedControlButtonClicked(void)));
-
-//    //button to send Header file to Cobalt
-//    indCompHeaderButton = new QPushButton("Send Header\nto Cobalt", this);
-//    indCompHeaderButton->setGeometry(170, 250, 140, 50);
-//    connect(indCompHeaderButton, SIGNAL (clicked(bool)), this, SLOT(indCompHeaderButtonClicked(void)));
-
-//    //button for receiving node's position
-//    recvGPSDetailsButton = new QPushButton("Receive Node\nDetails", this);
-//    recvGPSDetailsButton->setGeometry(170, 310, 140, 50);
-//    connect(recvGPSDetailsButton, SIGNAL (clicked(bool)), this, SLOT(recvGPSDetailsButtonClicked(void)));
 
 }
 
@@ -159,41 +156,6 @@ void Window::showVideoButtonClicked(void)
 
 
 //=======================================================================
-// indCompHeaderButtonClicked()
-//=======================================================================
-/*
-void Window::indCompHeaderButtonClicked(void)
-{
-    char* hFile [108];
-    ifstream file("NeXtRAD Header.txt");
-
-//    char* hFile [108];
-//    ifstream file("NeXtRAD Header.txt");
-
-//    string temp;
-//    char* line;
-//    int8_t len [108];
-
-//    for(int i = 0; i < 108; i++)
-//    {
-//        getline(file,temp);
-//        len[i] = temp.length();
-//        line = stringToCharPntr(temp);
-//        hFile [i] = line;
-//    }
-//    file.close();
-
-//    client.sendIndCompFile(hFile, len);
-
-
-    stringstream ss;
-    ss << "scp \"NeXtRAD Header.txt\" nextradnode" << (int) NODE_ID << "@192.168.1." << (int) (NODE_ID + 1) << "5:Desktop\n"; // scp is similar to ssh but used for file transfer
-    system(stringToCharPntr(ss.str()));
-
-}
-*/
-
-//=======================================================================
 // stringToCharPntr()
 //=======================================================================
 char* Window::stringToCharPntr(string str)
@@ -207,37 +169,18 @@ char* Window::stringToCharPntr(string str)
 //=======================================================================
 // recvGPSDetailsButtonClicked()
 //=======================================================================
-/*
+
 void Window::recvGPSDetailsButtonClicked(void)
 {
     if(client.isServerConnected())
     {
         client.receivePosition();
-    }11
-    else
-    {
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Not Running");
-    }
-}
-*/
-
-//=======================================================================
-// recvHFileButtonClicked()
-//=======================================================================
-/*
-void Window::recvHFileButtonClicked(void)
-{
-    if(client.isServerConnected())
-    {
-        client.receiveData();
     }
     else
     {
         statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Not Running");
     }
-
 }
-*/
 
 
 //=======================================================================
@@ -246,17 +189,17 @@ void Window::recvHFileButtonClicked(void)
 void Window::abortVideoRecordingButtonClicked(void)
 {
     //in 'countdown to start' mode only the starttimer needs to be stopped
-    if(timMode == 1)
+    if(timeMode == timeState::running)
     {
         starttimer->stop();
     }
     //in 'countdown to end' mode the starttimer must be stopped as well as the recording
-    else if(timMode == 2)
+    else if(timeMode == timeState::stopped)
     {
         stopRecording();
         endtimer->stop();
     }
-    timMode = 0;
+    timeMode = timeState::inactive;
     countDownLabel->setText("Video recording aborted!");
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording aborted!");
 }
@@ -266,9 +209,7 @@ void Window::abortVideoRecordingButtonClicked(void)
 //=======================================================================
 void Window::startSoundButtonClicked(void)
 {
-
-        startRecording();
-
+    startRecording();
 }
 
 
@@ -278,38 +219,34 @@ void Window::startSoundButtonClicked(void)
 void Window::stopSoundButtonClicked(void)
 {
     //in 'countdown to start' mode only the starttimer needs to be stopped
-    if(timMode == 1)
+    if (timeMode == timeState::running)
     {
         starttimer->stop();
     }
     //in 'countdown to end' mode the starttimer must be stopped as well as the recording
-    else if(timMode == 2)
+    else if(timeMode == timeState::stopped)
     {
         stopRecording();
         endtimer->stop();
     }
-    timMode = 0;
+    timeMode = timeState::inactive;
     countDownLabel->setText("Video recording aborted!");
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording aborted!");
 }
 
 
-
 //=======================================================================
 // updateCountDownLCD()
+// Updates the countdown LCD according.
 //=======================================================================
-/*Updates the countdown LCD according.  timMode==0 - no active countdowns
-                                        timMode==1 - countdown until recording starts
-                                        timMode==2 - countdown until recording ends
-*/
 void Window::updateCountDownLCD(void)
 {
     currentUnixTime = time(NULL);
-    if(timMode == 0)
+    if (timeMode == timeState::inactive)
     {
         countDown->display("00:00:00");
     }
-    else if(timMode == 1)
+    else if(timeMode == timeState::running)
     {
         countDown->display(getCountDownTime(strtUnixTime - currentUnixTime));
     }
@@ -327,29 +264,9 @@ void Window::updateCountDownLCD(void)
 //Calculates the hours minutes and seconds remaining for countdown
 QString Window::getCountDownTime(time_t timeLeft)
 {
-    /*
-    //Convert from unix time to hours, minutes, seconds
-    int tim = (int) timeLeft;
-    int hours, mins, secs;
-    secs = tim % 60;
-    tim -= secs;
-    tim = tim / 60;
-    mins = tim % 60;
-    tim -= mins;
-    hours = tim / 60;
-*/
-    //convert to QString to make easier to output
-/*
-    QString temp = QStringLiteral("%1:").arg(hours, 2, 10, QChar('0'));
-    temp.append(QStringLiteral("%1").arg(mins, 2, 10, QChar('0')));
-    temp.append(QStringLiteral(":%1").arg(secs, 2, 10, QChar('0')));
-    return temp;
-*/
-
     Datetime datetime;
     QString temp = datetime.getCountDownTime(timeLeft); //"%d.%m.%Y_%I:%M:%S");
     return temp;
-
 }
 
 //=======================================================================
@@ -369,26 +286,16 @@ void Window::connectionTestButtonClicked(void)
         if(client.isServerConnected())
         {
             statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Already Connected");
-
-//            statusBox->setTextColor("green");
-//            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     cnc")); // + QString::fromStdString(temp) ); //+ "CNCHub connected");
-//            statusBox->append("");
         }
         else
         {
             client.connectToCNC();
             if(!client.isServerConnected())
             {
+                //if connection refused then most likely the cnc server isn't running
                 statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Error Connecting to Server");
                 statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Check Terminal for Error");
-                //if connection refused then most likely the cnc server isn't running
             }
-//            else
-//            {
-//                statusBox->setTextColor("green");
-//                statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     cnc")); // + QString::fromStdString(temp) ); //+ "CNCHub connected");
-//                statusBox->append("");
-//            }
         }
     }
     else
@@ -397,25 +304,24 @@ void Window::connectionTestButtonClicked(void)
         testConnectionButton->setText("Not connected");
         testConnectionButton->setStyleSheet("* { background-color: rgb(255,125,100) }");
     }
-/*
+
+
     // Poll for new Header file
     if ((connectionManager.isConnected()) && (client.isServerConnected()))
     {
-        struct timeval tv;
-
         // Read Header file
-        ifstream headerFile;
-        headerFile.open("NeXtRAD_Header.txt");
-        printf("Header File opened\n");
-        while(!headerFile.open())
+        ifstream headerFile (NODE_HEADER_PATH);
+        while(!headerFile.is_open())
         {
-            tv.tv_usec = 200; //delay
+            usleep(200);
+            headerFile.open(NODE_HEADER_PATH);
         }
+        printf("Header File opened\n");
         headerFile.close();
-        CountDownButtonClicked ();
 
+        // Start countdown to armtime
+        CountDownButtonClicked ();
     }
-*/
 }
 
 
@@ -449,95 +355,34 @@ string Window::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 }
 
 
-
 //=======================================================================
 // startVideoRecordingCountDown()
 //=======================================================================
 //This method parses the start and end times for the video recording and starts the countdown starttimer
 void Window::CountDownButtonClicked(void)
 {
-    //Read start and end times from header file
-    ifstream headerFile;
-    headerFile.open("NeXtRAD_Header.txt");
-    printf("Header File opened\n");
-    string temp;
-    string timestamp;
+    Datetime datetime;
+    stringstream ss_unixtime;
+    HeaderArmFiles headerarmfiles;
 
-    string cnctimestamp = client.getTimeStamp().substr(0,19); //chop off weird ASCII values
-    printf("cnctimestamp = %s",cnctimestamp.c_str());
-    printf("\n");
-    while(!headerFile.eof())
-    {
-        getline(headerFile,temp);
-        if(temp.substr(0,9) == "StartTime")     //looking for the "StartTime" in the header file
-        {
-            if (temp.substr(9,3) == " = ")
-            {
-                startTime = temp.substr(12,19);
-            }
-            else if ((temp.substr(9,2) == " =") || (temp.substr(9,2) == "= "))
-            {
-                startTime = temp.substr(10,19);
-            }
-            else if (temp.substr(9,1) == "=")
-            {
-                startTime = temp.substr(11,19);
-            }
-            printf("startTime = %s\n", startTime.c_str());
-        }
-        else if(temp.substr(0,7) == "EndTime")  //looking for the "EndTime" in the header file
-        {
-            if (temp.substr(7,3) == " = ")
-            {
-                endTime = temp.substr(10,19);
-            }
-            else if ((temp.substr(7,2) == " =") || (temp.substr(7,2) == "= "))
-            {
-                endTime = temp.substr(9,19);
-            }
-            else if (temp.substr(7,1) == "=")
-            {
-                endTime = temp.substr(8,19);
-            }
-            printf("endTime = %s\n", endTime.c_str());
-		}
-        else if(temp.find("TimeStamp") != string::npos)
-        {
-            if (temp.substr(9,3) == " = ")
-            {
-                timestamp = temp.substr(12,19);
-            }
-            else if ((temp.substr(9,2) == " =") || (temp.substr(9,2) == "= "))
-            {
-                timestamp = temp.substr(10,19);
-            }
-            else if (temp.substr(9,1) == "=")
-            {
-                timestamp = temp.substr(11,19);
-            }
-            printf("timestamp = %s\n", timestamp.c_str());
-        }
-    }
+    QString year = headerarmfiles.readFromHeaderFile("Timing", "YEAR");
+    QString month = headerarmfiles.readFromHeaderFile("Timing", "MONTH");
+    QString day = headerarmfiles.readFromHeaderFile("Timing", "DAY");
+    QString hour = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
+    QString minute = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
+    QString second = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
 
-    headerFile.close();
+    //required format: YYYY-MM-DD HH:MM:SS
+    ss_unixtime << year.toStdString() << "-" << month.toStdString() << "-" << day.toStdString() << " ";
+    ss_unixtime << hour.toStdString() << ":" << minute.toStdString() << ":" << second.toStdString();
 
-    if(strcmp(stringToCharPntr(timestamp),stringToCharPntr(cnctimestamp)) == 0)
-    {
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header file matches CnC header file!");
-    }
-    else
-    {
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "CnC must send latest Header File");
-        return;
-    }
-
-    // Get Unix time (seconds since 01/01/1970)
+    strtUnixTime = datetime.convertToUnixTime(ss_unixtime.str());
+    //currently hardcoded to a two minute experiment.
+    //stop time should be calculated from header file parameters
+    stopUnixTime = strtUnixTime + ENDTIMESECS;
     currentUnixTime = time(NULL);
-    strtUnixTime = convertToUnixTime(startTime)+2;  // 2016-10-19 15:22:00 +2  = 146883322
-    stopUnixTime = convertToUnixTime(endTime)+4;    // The camera has a 2 second buffer which is why 2 seconds were added to start and 4 to end time
-    cout << "\n currentUnixTime " << currentUnixTime << "\n strtUnixTime " << strtUnixTime  << "\n stopUnixTime " << stopUnixTime << endl;
 
-    // Checking if the start and end times are in the past or not
+    //check if the start/end times are in the past
     if(strtUnixTime < currentUnixTime)
     {
         statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future start time");
@@ -548,16 +393,14 @@ void Window::CountDownButtonClicked(void)
     }
     else
     {
-        starttimer->start((convertToUnixTime(startTime)+ 2 - currentUnixTime)*1000);
-        //camera buffer stores 2 seconds, thus start two seconds later and record for 2 seconds longer.
-        countDownLabel->setText("Video recording starts in...");
-        timMode = 1;
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to video recording started");
+        starttimer->start((strtUnixTime - currentUnixTime)*1000);
+        countDownLabel->setText("Countdown to armtime");
+        timeMode = timeState::running;
+        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to armtime");
+        statusBox->append("");
     }
- 
-
-    fflush(stdout);
 }
+
 
 //=======================================================================
 // startRecording()
@@ -565,7 +408,7 @@ void Window::CountDownButtonClicked(void)
 //Method to start video recording and starts the countdown until the end of experiment
 void Window::startRecording(void)
 {
-    timMode = 2;
+    timeMode = timeState::running;
     videoRecorder.startRecording();
     endtimer->start((stopUnixTime - currentUnixTime)*1000);
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording started");
@@ -584,7 +427,7 @@ void Window::stopRecording(void)
     ss << "Saving video recording ";
 
     videoRecorder.stopRecording();
-    timMode = 0;
+    timeMode = timeState::inactive;
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording stopped");
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + ss.str().c_str());
     countDownLabel->setText("Video recording stopped");
@@ -607,35 +450,3 @@ void Window::stopRecording(void)
         cout << "Renamed video file to: " << newRecFileName << endl;
     }
 }
-
-
-//=======================================================================
-// convertToUnixTime()
-//=======================================================================
-//Method to convert time to 'yyyy-MM-dd hh:mm:ss' format then to data type time_t
-time_t Window::convertToUnixTime(string time)
-{
-    string str = time;
-    string s   = "";
-
-    // Convert the date from 'dd-MM-yyyy hh:mm:ss' to 'yyyy-MM-dd hh:mm:ss' format
-    if ((str.substr(2,1) == "-") && (str.substr(5,1) == "-") && (str.substr(10,1) == " "))
-    {
-        s.assign(str,6,4);  // yyyy
-        s.append(str,2,4);  // yyyy-MM-
-        s.append(str,0,2);  // yyyy-MM-dd
-        s.append(str,10,9); // yyyy-MM-dd hh:mm:ss
-    }
-    // Take as is if the date in 'yyyy-MM-dd hh:mm:ss' format
-    else if ((str.substr(4,1) == "-") && (str.substr(7,1) == "-") && (str.substr(10,1) == " "))
-    {
-        s = str;
-    }
-    //cout << "s is : " << s << endl;
-    
-    // Convert the date from 'yyyy-MM-dd hh:mm:ss' format to get correct Unix time!
-    struct tm tm;
-    strptime(s.c_str(), "%F %T", &tm);   //%F = yyyy-MM-dd; %T = hh:mm:ss
-    return mktime(&tm);
-}
-

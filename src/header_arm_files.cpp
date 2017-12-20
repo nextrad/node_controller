@@ -12,87 +12,58 @@
 
 HeaderArmFiles::HeaderArmFiles(void)
 {
-    headerFileName = "NeXtRAD_Header.txt";
-    headerPathName = "/home/nextrad/Documents/node_controller/NeXtRAD_Header.txt";
 
-    armtimecfgFileName = "armtime.cfg";
-    armtimecfgPathName = "/home/nextrad/Documents/node_controller/armtime.cfg";   // /home/nextrad/Desktop/NextGPSDO/armtime.cfg";
+
 }
-
-string HeaderArmFiles::getHeaderFileName()
-{
-    return headerFileName;
-}
-
-string HeaderArmFiles::getHeaderPathName()
-{
-    return headerPathName;
-}
-
-void HeaderArmFiles::setHeaderFileName(string newname)
-{
-    headerFileName =  newname;
-}
-
-string HeaderArmFiles::getArmtimecfgFileName()
-{
-    return armtimecfgFileName;
-}
-
-string HeaderArmFiles::getArmtimecfgPathName()
-{
-    return armtimecfgPathName;
-}
-
 
 //=============================================================================
 // writeToHeaderFile()
 //=============================================================================
 //method to set a variable's value in the NeXtRAD header file
-void HeaderArmFiles::writeToHeaderFile(string varName, string data, string section)
+void HeaderArmFiles::writeToHeaderFile(string section, string key, string value)
 {
-    //Read Header File
-    ifstream rfile (getHeaderFileName()); //  (HEADER_FILE);
-    string content [H_FILE_LENGTH];
-    int pos = -1;
-    //copy data from file into string array
-    //some variable names are repeated so the section position must be found first
-    for(int i = 0; i < H_FILE_LENGTH; i++)
+    std::ifstream check (NODE_HEADER_PATH);
+    if (!check.good())
     {
-        getline(rfile,content[i]);
-        if(content[i].find(section) != string::npos)                                //if the section's name is found
-        {
-            pos = i;
-        }
-    }
-    rfile.close();
-    //search for variable from start of relevant section
-    while(pos < H_FILE_LENGTH - 1)
-    {
-        pos++;
-        if(content[pos].find(varName) != string::npos)                                //if the variable's name is found
-        {
-            break;                                                                    //take first occurance of the variable name
-        }
-    }
-    //replace corresponding variable with new value
-    content[pos] = varName;
-    content[pos].append(" = ");
-    content[pos].append(data);
-    content[pos].append(";\r");                       //Use \r (carriage return) because sometimes it gets forgotten
-    //overwrite file with new value
-    ofstream wfile (getHeaderFileName()); // (HEADER_FILE);
-    for(int i = 0; i < H_FILE_LENGTH; i++)
-    {
-        wfile << content[i] << endl;                            //Use endl because it adds \n which gets removed in getline()
+        printf("Please check location of header file and try again.\n");
+        exit(EXIT_FAILURE);
     }
 
-    wfile.close();
-    for(int i = 0; i < H_FILE_LENGTH; i++)
+    CSimpleIniA ini;
+
+    ini.LoadFile(NODE_HEADER_PATH);
+
+    ini.SetValue(section.c_str(),key.c_str(),value.c_str());
+
+    ini.SaveFile(NODE_HEADER_PATH);
+
+    check.close();
+}
+
+
+//=============================================================================
+// readFromHeaderFile()
+//=============================================================================
+//method to return a variable's value from the NeXtRAD header file
+QString HeaderArmFiles::readFromHeaderFile(string section, string var)
+{
+    //Read from header file
+    std::ifstream check(NODE_HEADER_PATH);
+    if (!check.good())
     {
-        content [i] = '\0';
+        printf("Please check location of header file and try again.\n");
+        exit(EXIT_FAILURE);
     }
-    fflush(stdout);
+
+    CSimpleIniA ini;
+
+    ini.LoadFile(NODE_HEADER_PATH);
+
+    std::string value = (ini.GetValue(section.c_str(), var.c_str()));
+
+    check.close();
+
+    return  QString::fromUtf8(value.c_str());
 }
 
 
@@ -103,83 +74,12 @@ void HeaderArmFiles::writeToHeaderFile(string varName, string data, string secti
 void HeaderArmFiles::writeToArmtimecfgFile(string data)
 {
     //overwrite file with new value
-    ofstream wfile (armtimecfgFileName);
-    stringstream ss;
-    ss << "Date=" << data.substr(8,2) << "/" << data.substr(5,2) << "/" << data.substr(0,4);
-    wfile << ss.str() << endl;
-    ss.str("");
-    ss << "Arm_Time=" << data.substr(11,8) << endl;
-    wfile << ss.str() << endl;
+    ofstream wfile (ARMTIMECFG_PATH);
+    wfile << data;
     wfile.close();
 
     fflush(stdout);
 }
 
 
-//=============================================================================
-// readFromHeaderFile()
-//=============================================================================
-//method to return a variable's value from the NeXtRAD header file
-QString HeaderArmFiles::readFromHeaderFile(string varName, string section)
-{
-    //Read from header file
-    ifstream rfile (getHeaderFileName()); // (HEADER_FILE);
-    string temp = "";
-    int pos = -1;
 
-    //find line with corresponding variable's name and find position of the variable's value on that line
-    while(!rfile.eof())
-    {
-        getline(rfile,temp);
-        if(temp.find(section) != string::npos)
-        {
-            pos = -2;                                                   //pos = -2 is just to indicate that the section was found
-        }
-        if(pos == -2)
-        {
-            if(temp.find(varName) != string::npos)                      //if the variable's name is found
-            {
-                pos = temp.find_first_of('=') + 2;                       //+2 because data starts after "= "
-                break;
-            }
-        }
-    }
-    rfile.close();
-    if(pos < 0)
-    {
-        string str = "error: can't find variable";
-        return "Error";
-    }
-    //cout << "substring" << endl;                              //debugging
-
-    //convert from std::string to QString
-    string str = temp.substr(pos, temp.find_last_of(';') - pos);
-    //cout << "substring end" << endl;                              //debugging
-
-
-    return   QString::fromUtf8( str.c_str());
-}
-
-//=============================================================================
-// renameHeaderFile()
-//=============================================================================
-//method to rename the NeXtRAD header file
-int HeaderArmFiles::renameHeaderFile(string newname)
-{
-    int result;
-    result = rename( getHeaderFileName().c_str() , newname.c_str() );
-    return result;
-}
-
-/*
-//=============================================================================
-// saveHeaderFile()
-//=============================================================================
-//method to rename the NeXtRAD header file
-int HeaderArmFiles::saveHeaderFile(string newname)
-{
-    int result;
-    result = rename( getHeaderFileName().c_str() , newname.c_str() );
-    return result;
-}
-*/

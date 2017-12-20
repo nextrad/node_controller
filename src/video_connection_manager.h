@@ -12,7 +12,7 @@
 #include "parameters.h"
 #include <QTimer>
 
-enum WritePrivacy {PUBLIC, PRIVATE};
+//enum WritePrivacy {PUBLIC, PRIVATE};
 
 class VideoConnectionManager
 {
