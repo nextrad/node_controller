@@ -38,7 +38,6 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 #define TONES_PATH           "../media/tones/"
 
 #define STARTTIMESECS       20
-#define ENDTIMESECS         120
 
 
 #endif // PARAMETERS_H

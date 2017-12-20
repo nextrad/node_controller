@@ -15,12 +15,15 @@
 #include "video_connection_manager.h"
 
 int NODE_ID;
+int ENDTIMESECS;
 string RTSP_HOST;
 string OUTPUT_DIRECTORY;
 string OVERLAY_IMAGE;
 
+
 void testNTP(void);
 void setParameters(void);
+
 
 int main(int argc, char **argv)
 {
@@ -35,7 +38,6 @@ int main(int argc, char **argv)
 
     app.exec();
     return 0;
-
 }
 
 void testNTP(void)
@@ -72,6 +74,8 @@ void setParameters(void)
 
         OVERLAY_IMAGE = "/home/nextrad/Documents/Video/overlay_images/crosshair_1080p.png";
         OUTPUT_DIRECTORY = "/home/nextrad/Documents/Video/output/";
+        ENDTIMESECS = 200;  //default value
+
 
         switch (nodeNo)
         {

@@ -21,9 +21,11 @@
 #include <QDateTime>
 
 extern int NODE_ID;
+extern int ENDTIMESECS;
 extern string RTSP_HOST;
 extern string OVERLAY_IMAGE;
 extern string OUTPUT_DIRECTORY;
+
 
 //=======================================================================
 // Constructor
@@ -40,11 +42,13 @@ Window::Window(QWidget *parent) : QWidget(parent)
     printf("NeXtRAD VLC Telnet Controller\n");
     printf("-----------------------------\n");
 
-    system("x-terminal-emulator -e \"vlc -I telnet\n\"");
-    sleep(1);
+//    system("x-terminal-emulator -e \"vlc -I telnet\n\"");
 
-    videoRecorder.connectToSocket();
-    videoRecorder.configureVideoStream();
+//    sleep(3);
+
+//    videoRecorder.connectToSocket();
+//    videoRecorder.configureVideoStream();
+
 
     //Set up starttimers for start and end recording and update countdown clock
     stopUnixTime = time(NULL);
@@ -356,7 +360,8 @@ string Window::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 
 
 //=======================================================================
-// startVideoRecordingCountDown()
+// CountDownButtonClicked()
+// Start countdown to armtime
 //=======================================================================
 //This method parses the start and end times for the video recording and starts the countdown starttimer
 void Window::CountDownButtonClicked(void)
@@ -365,6 +370,7 @@ void Window::CountDownButtonClicked(void)
     stringstream ss_unixtime;
     HeaderArmFiles headerarmfiles;
 
+    // read armtime from Header File values
     QString year = headerarmfiles.readFromHeaderFile("Timing", "YEAR");
     QString month = headerarmfiles.readFromHeaderFile("Timing", "MONTH");
     QString day = headerarmfiles.readFromHeaderFile("Timing", "DAY");
@@ -372,13 +378,26 @@ void Window::CountDownButtonClicked(void)
     QString minute = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
     QString second = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
 
+    // calculate ENDTIMESECS from Header File values
+    QString num_pris = headerarmfiles.readFromHeaderFile("PulseParameters", "NUM_PRIS");
+    QString pri = headerarmfiles.readFromHeaderFile("PulseParameters", "PRI");    // microseconds
+    bool ok1 = false;
+    bool ok2 = false;
+    int numpris = num_pris.toInt(&ok1, 10);
+    int pris = pri.toInt(&ok2, 10);
+    if (!ok1 || !ok2)
+    {
+        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "The calculation of endtime failed");
+        return;
+    }
+    ENDTIMESECS = numpris * pris / 1000;  // = 6000 * 1000/1000 = 6000
+
     //required format: YYYY-MM-DD HH:MM:SS
     ss_unixtime << year.toStdString() << "-" << month.toStdString() << "-" << day.toStdString() << " ";
     ss_unixtime << hour.toStdString() << ":" << minute.toStdString() << ":" << second.toStdString();
 
+    //change times to Unix time format
     strtUnixTime = datetime.convertToUnixTime(ss_unixtime.str());
-    //currently hardcoded to a two minute experiment.
-    //stop time should be calculated from header file parameters
     stopUnixTime = strtUnixTime + ENDTIMESECS;
     currentUnixTime = time(NULL);
 
@@ -391,7 +410,7 @@ void Window::CountDownButtonClicked(void)
     {
         statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future stop time");
     }
-    else
+    else // start countdown to armtime
     {
         starttimer->start((strtUnixTime - currentUnixTime)*1000);
         countDownLabel->setText("Countdown to armtime");
@@ -412,7 +431,7 @@ void Window::startRecording(void)
     videoRecorder.startRecording();
     endtimer->start((stopUnixTime - currentUnixTime)*1000);
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording started");
-    countDownLabel->setText("Video recording ends in...");
+    countDownLabel->setText("Video recording ends in ...");
 }
 
 
