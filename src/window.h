@@ -31,15 +31,18 @@ class Window : public QWidget
         QString getCountDownTime(time_t timeLeft);
     private:
         int m_counter;
-        enum timeState {inactive=0, running=1, stopped=2};
+
+        //inactive is for prior to and after an experiment
+        //waiting is before start time
+        //active is during an experiment, between start and end time
+        // INACTIVE -> WAITING -> ACTIVE -> INACTIVE
+        enum timeState {INACTIVE=0, WAITING=1, ACTIVE=2};
         QPushButton *testConnectionButton;
         //QPushButton *startPedControlButton;
         QPushButton *startVideoRecButton;
         QPushButton *abortVideoRecButton;
         QPushButton *showVideoButton;
         QPushButton *recvGPSDetailsButton;
-        QPushButton *startSoundButton;
-        QPushButton *stopSoundButton;
         QLCDNumber *countDown;
         QTextEdit *statusBox;
         QLabel *countDownLabel;
@@ -47,13 +50,13 @@ class Window : public QWidget
         VideoConnectionManager videoRecorder;
         QTimer *starttimer;
         QTimer *endtimer;
-        QTimer *countDownTim;
+        QTimer *countdowntimer;
         string startTime;
         string endTime;
         time_t strtUnixTime;
         time_t stopUnixTime;
         time_t currentUnixTime;
-        int timeMode;
+        int experiment_state;
         void initGUI(void);
         NetworkManager client;
 
@@ -66,8 +69,6 @@ class Window : public QWidget
         void CountDownButtonClicked(void);
         void abortVideoRecordingButtonClicked(void);
         void showVideoButtonClicked(void);
-        void startSoundButtonClicked(void);
-        void stopSoundButtonClicked(void);
         void recvGPSDetailsButtonClicked(void);
         char* stringToCharPntr(string str);
         string replaceCharsinStr(string str_in, char ch_in, char ch_out);

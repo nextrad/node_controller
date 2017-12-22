@@ -63,6 +63,8 @@ void VideoConnectionManager::clearSocketBuffer(void)
 
 void VideoConnectionManager::connectToSocket(void)
 {
+    int attempt = 0;
+
     cout << "Attempting to establish connection to VLC server..." << endl;
     try
     {
@@ -72,9 +74,15 @@ void VideoConnectionManager::connectToSocket(void)
     }
     catch (boost::system::system_error const& e) //exception was thrown, connection failed
     {
-        cout << "Error: could not " << e.what();
-        //exit(0);
-
+        if (attempt < 5)
+        {
+            //caught an exception
+            //currently prints the error if an exception has been caught, sleeps and tries again
+            cout << "Attempt: " << attempt << ", error: could not " << e.what() << endl;
+            sleep(3);
+            connectToSocket();
+            attempt++;
+        }
     }
 }
 

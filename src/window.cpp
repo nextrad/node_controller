@@ -21,7 +21,7 @@
 #include <QDateTime>
 
 extern int NODE_ID;
-extern int ENDTIMESECS;
+extern int EXPERIMENT_LENGTH; //in seconds
 extern string RTSP_HOST;
 extern string OVERLAY_IMAGE;
 extern string OUTPUT_DIRECTORY;
@@ -32,39 +32,33 @@ extern string OUTPUT_DIRECTORY;
 //=======================================================================
 Window::Window(QWidget *parent) : QWidget(parent)
 {
-    timeMode = timeState::inactive; //count down mode
+    experiment_state = INACTIVE; //see enum for explanation
 
     //Set size of window
     setMinimumSize(600,400); //FixedSize(600,400);
 
     initGUI();
-    //Establish connection to camera
-    printf("NeXtRAD VLC Telnet Controller\n");
-    printf("-----------------------------\n");
 
-//    system("x-terminal-emulator -e \"vlc -I telnet\n\"");
+    //start vlc telnet server, connect and configure
+    system("x-terminal-emulator -e \"vlc -I telnet\n\"");
+    videoRecorder.connectToSocket();
+    videoRecorder.configureVideoStream();
 
-//    sleep(3);
-
-//    videoRecorder.connectToSocket();
-//    videoRecorder.configureVideoStream();
-
-
-    //Set up starttimers for start and end recording and update countdown clock
-    stopUnixTime = time(NULL);
+    //start timer calls startRecording() once it reaches the start time (happens once)
     starttimer = new QTimer(this);
     starttimer->setSingleShot(true);
     connect(starttimer, SIGNAL(timeout()), this, SLOT(startRecording()));
 
+    //end timer calls stopRecording() once it reaches the end time (happens once)
     endtimer = new QTimer(this);
     endtimer->setSingleShot(true);
     connect(endtimer, SIGNAL(timeout()), this, SLOT(stopRecording()));
 
-    countDownTim = new QTimer(this);
-    countDownTim->setInterval(1000);
-    connect(countDownTim, SIGNAL(timeout()), this, SLOT(updateCountDownLCD()));
-    countDownTim->start(1000);
-
+    //the count down timer calls updateCountDownLCD() every second
+    countdowntimer = new QTimer(this);
+    countdowntimer->setInterval(1000);
+    connect(countdowntimer, SIGNAL(timeout()), this, SLOT(updateCountDownLCD()));
+    countdowntimer->start(1000);
 }
 
 
@@ -79,7 +73,6 @@ void Window::initGUI(void)
     stringstream ss;
     ss << "Node " << (int)NODE_ID;
     label->setText(stringToCharPntr(ss.str()));
-    ss.str("");         //clear stringstream
     label->setFont(QFont("Ubuntu",36));
     label->show();
 
@@ -104,21 +97,11 @@ void Window::initGUI(void)
     testConnectionButton->setGeometry(15, 70, 140, 50);
     connect(testConnectionButton, SIGNAL (clicked(bool)), this, SLOT(connectionTestButtonClicked(void)));
 
-//    //button for starting pedestal controller program
-//    startPedControlButton = new QPushButton("Start Pedestal\nController", this);
-//    startPedControlButton->setGeometry(15, 120, 140, 50);
-//    connect(startPedControlButton, SIGNAL (clicked(bool)), this, SLOT(startPedControlButtonClicked(void)));
-
     //button for receiving node's position
     recvGPSDetailsButton = new QPushButton("Receive Node\nDetails", this);
     recvGPSDetailsButton->setGeometry(15, 120, 140, 50);
     connect(recvGPSDetailsButton, SIGNAL (clicked(bool)), this, SLOT(recvGPSDetailsButtonClicked(void)));
-/*
-    //button for starting countdown starttimer for video recording
-    startVideoRecButton = new QPushButton("Countdown to\nVideo Recording", this);
-    startVideoRecButton->setGeometry(15, 170, 140, 50);
-    connect(startVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(CountDownButtonClicked(void)));
-*/
+
     //button to show the video recording
     showVideoButton = new QPushButton("Show Video\nFeed", this);
     showVideoButton->setGeometry(15, 170, 140, 50);
@@ -128,19 +111,6 @@ void Window::initGUI(void)
     abortVideoRecButton = new QPushButton("Abort\nVideo Recording", this);
     abortVideoRecButton->setGeometry(15, 220, 140, 50);
     connect(abortVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(abortVideoRecordingButtonClicked(void)));
-/*
-    //button to start sound
-    startSoundButton = new QPushButton("Start\nSound", this);
-    startSoundButton->setGeometry(15, 270, 140, 50);
-    connect(startSoundButton, SIGNAL (clicked(bool)), this, SLOT(startSoundButtonClicked(void)));
-
-    //button to stop sound
-    stopSoundButton = new QPushButton("Stop\nSound", this);
-    stopSoundButton->setGeometry(15, 320, 140, 50);
-    connect(stopSoundButton, SIGNAL (clicked(bool)), this, SLOT(stopSoundButtonClicked(void)));
-
-*/
-
 }
 
 
@@ -193,51 +163,21 @@ void Window::recvGPSDetailsButtonClicked(void)
 void Window::abortVideoRecordingButtonClicked(void)
 {
     //in 'countdown to start' mode only the starttimer needs to be stopped
-    if(timeMode == timeState::running)
+    if(experiment_state == WAITING)
     {
         starttimer->stop();
+        endtimer->stop();
     }
     //in 'countdown to end' mode the starttimer must be stopped as well as the recording
-    else if(timeMode == timeState::stopped)
+    else if(experiment_state == ACTIVE)
     {
         stopRecording();
         endtimer->stop();
     }
-    timeMode = timeState::inactive;
+    experiment_state = INACTIVE;
     countDownLabel->setText("Video recording aborted!");
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording aborted!");
 }
-
-//=======================================================================
-// startSoundButtonClicked()
-//=======================================================================
-void Window::startSoundButtonClicked(void)
-{
-    startRecording();
-}
-
-
-//=======================================================================
-// stopSoundButtonClicked()
-//=======================================================================
-void Window::stopSoundButtonClicked(void)
-{
-    //in 'countdown to start' mode only the starttimer needs to be stopped
-    if (timeMode == timeState::running)
-    {
-        starttimer->stop();
-    }
-    //in 'countdown to end' mode the starttimer must be stopped as well as the recording
-    else if(timeMode == timeState::stopped)
-    {
-        stopRecording();
-        endtimer->stop();
-    }
-    timeMode = timeState::inactive;
-    countDownLabel->setText("Video recording aborted!");
-    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording aborted!");
-}
-
 
 //=======================================================================
 // updateCountDownLCD()
@@ -246,19 +186,18 @@ void Window::stopSoundButtonClicked(void)
 void Window::updateCountDownLCD(void)
 {
     currentUnixTime = time(NULL);
-    if (timeMode == timeState::inactive)
+    if (experiment_state == INACTIVE)
     {
         countDown->display("00:00:00");
     }
-    else if(timeMode == timeState::running)
+    else if(experiment_state == WAITING)
     {
         countDown->display(getCountDownTime(strtUnixTime - currentUnixTime));
     }
-    else
+    else if(experiment_state == ACTIVE)
     {
         countDown->display(getCountDownTime(stopUnixTime - currentUnixTime));
     }
-
 }
 
 
@@ -310,14 +249,18 @@ void Window::connectionTestButtonClicked(void)
     }
 
 
+    int attempt = 0;
+
     // Poll for new Header file
     if ((connectionManager.isConnected()) && (client.isServerConnected()))
     {
         // Read Header file
         ifstream headerFile (NODE_HEADER_PATH);
+
         while(!headerFile.is_open())
         {
-            usleep(200);
+            cout << "Polling for header file, attempt: " << attempt++ << endl;
+            usleep(0.1e6);
             headerFile.open(NODE_HEADER_PATH);
         }
         printf("Header File opened\n");
@@ -379,18 +322,9 @@ void Window::CountDownButtonClicked(void)
     QString second = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
 
     // calculate ENDTIMESECS from Header File values
-    QString num_pris = headerarmfiles.readFromHeaderFile("PulseParameters", "NUM_PRIS");
-    QString pri = headerarmfiles.readFromHeaderFile("PulseParameters", "PRI");    // microseconds
-    bool ok1 = false;
-    bool ok2 = false;
-    int numpris = num_pris.toInt(&ok1, 10);
-    int pris = pri.toInt(&ok2, 10);
-    if (!ok1 || !ok2)
-    {
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "The calculation of endtime failed");
-        return;
-    }
-    ENDTIMESECS = numpris * pris / 1000;  // = 6000 * 1000/1000 = 6000
+    int num_pris = atoi(headerarmfiles.readFromHeaderFile("PulseParameters", "NUM_PRIS").toStdString().c_str());
+    int pri = atoi(headerarmfiles.readFromHeaderFile("PulseParameters", "PRI").toStdString().c_str());    // microseconds
+    EXPERIMENT_LENGTH = num_pris * pri * 1e-6;  // = 60000 * 1000/1000000 = 60
 
     //required format: YYYY-MM-DD HH:MM:SS
     ss_unixtime << year.toStdString() << "-" << month.toStdString() << "-" << day.toStdString() << " ";
@@ -398,7 +332,7 @@ void Window::CountDownButtonClicked(void)
 
     //change times to Unix time format
     strtUnixTime = datetime.convertToUnixTime(ss_unixtime.str());
-    stopUnixTime = strtUnixTime + ENDTIMESECS;
+    stopUnixTime = strtUnixTime + EXPERIMENT_LENGTH;
     currentUnixTime = time(NULL);
 
     //check if the start/end times are in the past
@@ -414,7 +348,7 @@ void Window::CountDownButtonClicked(void)
     {
         starttimer->start((strtUnixTime - currentUnixTime)*1000);
         countDownLabel->setText("Countdown to armtime");
-        timeMode = timeState::running;
+        experiment_state = WAITING;
         statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to armtime");
         statusBox->append("");
     }
@@ -427,7 +361,7 @@ void Window::CountDownButtonClicked(void)
 //Method to start video recording and starts the countdown until the end of experiment
 void Window::startRecording(void)
 {
-    timeMode = timeState::running;
+    experiment_state = ACTIVE;
     videoRecorder.startRecording();
     endtimer->start((stopUnixTime - currentUnixTime)*1000);
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording started");
@@ -446,7 +380,7 @@ void Window::stopRecording(void)
     ss << "Saving video recording ";
 
     videoRecorder.stopRecording();
-    timeMode = timeState::inactive;
+    experiment_state = INACTIVE;
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording stopped");
     statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + ss.str().c_str());
     countDownLabel->setText("Video recording stopped");
