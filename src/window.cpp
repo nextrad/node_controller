@@ -255,13 +255,13 @@ void Window::connectionTestButtonClicked(void)
     if ((connectionManager.isConnected()) && (client.isServerConnected()))
     {
         // Read Header file
-        ifstream headerFile (NODE_HEADER_PATH);
+        ifstream headerFile (HEADER_PATH);
 
         while(!headerFile.is_open())
         {
             cout << "Polling for header file, attempt: " << attempt++ << endl;
             usleep(0.1e6);
-            headerFile.open(NODE_HEADER_PATH);
+            headerFile.open(HEADER_PATH);
         }
         printf("Header File opened\n");
         headerFile.close();

@@ -12,30 +12,26 @@
 
 enum WritePrivacy {PUBLIC, PRIVATE};
 
-#define SOCKET_BUFFER_SIZE 	300
-#define CNC_ADDRESS          "192.168.1.100"
+#define SOCKET_BUFFER_SIZE  300
+#define CNC_ADDRESS         "192.168.1.100"
 #define SSH_PORT            22
-#define TELNET_HOST 		"127.0.0.1"
-#define TELNET_PORT 		4212
+#define TELNET_HOST         "127.0.0.1"
+#define TELNET_PORT         4212
 #define AUDIO_TELNET_PORT   5038
-#define TELNET_PASSWORD		"vlc"
+#define TELNET_PASSWORD     "vlc"
 
-#define RTSP_PORT			"88"
+#define RTSP_PORT           "88"
 
-#define CAMERA_RESOLUTION 	480
+#define CAMERA_RESOLUTION   480
 
-#define IS_MOSAIC_MODE		true
+#define IS_MOSAIC_MODE      true
 #define H_FILE_LENGTH       112
 
 #define HEADER_FILE         "NeXtRAD.ini"
-#define CNC_HEADER_PATH     "/home/nextrad/Documents/cnc_controller/NeXtRAD.ini"
-#define NODE_HEADER_PATH    "/home/nextrad/Documents/node_controller/NeXtRAD.ini"
-
-#define ARMTIMECFG_FILE     "armtime.cfg"
-#define ARMTIMECFG_PATH     "/home/nextrad/Documents/cnc_controller/armtime.cfg"
+#define HEADER_PATH         "/home/nextrad/Documents/nextrad_header/" HEADER_FILE
 
 #define ICON_PATH           "../media/icons/favicon2.ico"
-#define TONES_PATH           "../media/tones/"
+#define TONES_PATH          "../media/tones/"
 
 #define STARTTIMESECS       20
 

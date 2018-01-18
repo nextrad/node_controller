@@ -22,7 +22,7 @@ HeaderArmFiles::HeaderArmFiles(void)
 //method to set a variable's value in the NeXtRAD header file
 void HeaderArmFiles::writeToHeaderFile(string section, string key, string value)
 {
-    std::ifstream check (NODE_HEADER_PATH);
+    std::ifstream check (HEADER_PATH);
     if (!check.good())
     {
         printf("Please check location of header file and try again.\n");
@@ -31,11 +31,11 @@ void HeaderArmFiles::writeToHeaderFile(string section, string key, string value)
 
     CSimpleIniA ini;
 
-    ini.LoadFile(NODE_HEADER_PATH);
+    ini.LoadFile(HEADER_PATH);
 
     ini.SetValue(section.c_str(),key.c_str(),value.c_str());
 
-    ini.SaveFile(NODE_HEADER_PATH);
+    ini.SaveFile(HEADER_PATH);
 
     check.close();
 }
@@ -48,7 +48,7 @@ void HeaderArmFiles::writeToHeaderFile(string section, string key, string value)
 QString HeaderArmFiles::readFromHeaderFile(string section, string var)
 {
     //Read from header file
-    std::ifstream check(NODE_HEADER_PATH);
+    std::ifstream check(HEADER_PATH);
     if (!check.good())
     {
         printf("Please check location of header file and try again.\n");
@@ -57,7 +57,7 @@ QString HeaderArmFiles::readFromHeaderFile(string section, string var)
 
     CSimpleIniA ini;
 
-    ini.LoadFile(NODE_HEADER_PATH);
+    ini.LoadFile(HEADER_PATH);
 
     std::string value = (ini.GetValue(section.c_str(), var.c_str()));
 
@@ -65,21 +65,3 @@ QString HeaderArmFiles::readFromHeaderFile(string section, string var)
 
     return  QString::fromUtf8(value.c_str());
 }
-
-
-//=============================================================================
-// writeToArmtimecfgFile()
-//=============================================================================
-//method to set up the NextGPSDO armtime.cfg file
-void HeaderArmFiles::writeToArmtimecfgFile(string data)
-{
-    //overwrite file with new value
-    ofstream wfile (ARMTIMECFG_PATH);
-    wfile << data;
-    wfile.close();
-
-    fflush(stdout);
-}
-
-
-
