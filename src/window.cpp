@@ -165,7 +165,7 @@ void Window::receiveNodePosition(int node_num)
     int status;
     int ret;
     string lat, lon, ht;
-/*
+
     ss << "ansible node" << node_num << " -m fetch -a \"src=~/Desktop/NextGPSDO/gps_info.cfg dest=~/Documents/cnc_controller/node"  << node_num << "/\"";
     cout << ss.str().c_str() << endl;
 
@@ -175,7 +175,7 @@ void Window::receiveNodePosition(int node_num)
         ret = WEXITSTATUS(status);
 
         if (ret==0)
-        {*/
+        {
             // Parse gpsinfo.ini file
             lat = headerarmfiles.readFromGPSInfoFile(node_num,"LATITUDE");
             lon = headerarmfiles.readFromGPSInfoFile(node_num,"LONGITUDE");
@@ -202,16 +202,16 @@ void Window::receiveNodePosition(int node_num)
             statusBox->setTextColor("green");
             statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
                         + "lat=" + QString::fromStdString(lat) + ", \tlong=" + QString::fromStdString(lon) + ", \tht=" + QString::fromStdString(ht));
-       /* }
+        }
         else
-        {*/
+        {
             // Display data on screen in red X per node
             statusBox->setTextColor("red");
             statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
-      /*  }
+        }
     }
     ss.str("");             //clear stringstream
-    statusBox->append("");*/
+    statusBox->append("");
 }
 
 
