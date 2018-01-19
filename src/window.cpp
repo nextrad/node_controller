@@ -98,9 +98,9 @@ void Window::initGUI(void)
     connect(testConnectionButton, SIGNAL (clicked(bool)), this, SLOT(connectionTestButtonClicked(void)));
 
     //button for receiving node's position
-    recvGPSDetailsButton = new QPushButton("Receive Node\nDetails", this);
-    recvGPSDetailsButton->setGeometry(15, 120, 140, 50);
-    connect(recvGPSDetailsButton, SIGNAL (clicked(bool)), this, SLOT(recvGPSDetailsButtonClicked(void)));
+    receiveNodePositionsButton = new QPushButton("Receive Node\nDetails", this);
+    receiveNodePositionsButton->setGeometry(15, 120, 140, 50);
+    connect(receiveNodePositionsButton, SIGNAL (clicked(bool)), this, SLOT(receiveNodePositionsButtonClicked(void)));
 
     //button to show the video recording
     showVideoButton = new QPushButton("Show Video\nFeed", this);
@@ -140,20 +140,78 @@ char* Window::stringToCharPntr(string str)
 }
 
 
-//=======================================================================
-// recvGPSDetailsButtonClicked()
-//=======================================================================
+//=============================================================================
+// receiveNodePositionsButtonClicked()
+// method to receive the node's positions from the GPSDO.
+//=============================================================================
 
-void Window::recvGPSDetailsButtonClicked(void)
+void Window::receiveNodePositionsButtonClicked(void)
 {
-    if(client.isServerConnected())
+    statusBox->append("");
+    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Fetching GPS info file from GPSDO");
+    statusBox->append("");
+
+    receiveNodePosition(NODE_ID);
+
+    statusBox->append("");
+}
+
+//=============================================================================
+// receiveNodePosition()
+//=============================================================================
+void Window::receiveNodePosition(int node_num)
+{
+    stringstream ss;
+    int status;
+    int ret;
+    string lat, lon, ht;
+/*
+    ss << "ansible node" << node_num << " -m fetch -a \"src=~/Desktop/NextGPSDO/gps_info.cfg dest=~/Documents/cnc_controller/node"  << node_num << "/\"";
+    cout << ss.str().c_str() << endl;
+
+    status = system(stringToCharPntr(ss.str()));
+    if (-1 != status)
     {
-        client.receivePosition();
+        ret = WEXITSTATUS(status);
+
+        if (ret==0)
+        {*/
+            // Parse gpsinfo.ini file
+            lat = headerarmfiles.readFromGPSInfoFile(node_num,"LATITUDE");
+            lon = headerarmfiles.readFromGPSInfoFile(node_num,"LONGITUDE");
+            ht = headerarmfiles.readFromGPSInfoFile(node_num,"ALTITUDE");
+
+             // Update Header file
+            switch (node_num)
+            {
+                case 0: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_HT", ht);
+                        break;
+                case 1: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_HT", ht);
+                        break;
+                case 2: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_HT", ht);
+                        break;
+            }
+
+            // Display data on screen in green values per node
+            statusBox->setTextColor("green");
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
+                        + "lat=" + QString::fromStdString(lat) + ", \tlong=" + QString::fromStdString(lon) + ", \tht=" + QString::fromStdString(ht));
+       /* }
+        else
+        {*/
+            // Display data on screen in red X per node
+            statusBox->setTextColor("red");
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+      /*  }
     }
-    else
-    {
-        statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Not Running");
-    }
+    ss.str("");             //clear stringstream
+    statusBox->append("");*/
 }
 
 

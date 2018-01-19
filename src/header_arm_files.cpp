@@ -65,3 +65,40 @@ QString HeaderArmFiles::readFromHeaderFile(string section, string var)
 
     return  QString::fromUtf8(value.c_str());
 }
+
+//=============================================================================
+// readFromGPSInfoFile()
+//=============================================================================
+//method to return a variable's value from a GPSInfo file
+string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
+{
+    string path;
+
+    switch (nodeno)
+    {
+        case 0: path = NODE_NODE0_GPS_INFO_PATH;
+                break;
+        case 1: path = NODE_NODE1_GPS_INFO_PATH;
+                break;
+        case 2: path = NODE_NODE2_GPS_INFO_PATH;
+                break;
+    }
+
+    //Read from header file
+    std::ifstream check (path);
+    if (!check.good())
+    {
+        printf("Please check location of gps info file and try again.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    CSimpleIniA ini;
+
+    ini.LoadFile(path.c_str());
+
+    std::string value = (ini.GetValue("", var.c_str()));
+
+    check.close();
+
+    return value;
+}

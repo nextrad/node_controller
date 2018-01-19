@@ -29,25 +29,35 @@ class Window : public QWidget
     public:
         explicit Window(QWidget *parent = 0);
         QString getCountDownTime(time_t timeLeft);
-    private:
-        int m_counter;
+        void receiveNodePosition(int node_num);
+        string replaceCharsinStr(string str_in, char ch_in, char ch_out);
+        char* stringToCharPntr(string str);
+        string setButtonColour(int colourno);
 
-        //inactive is for prior to and after an experiment
-        //waiting is before start time
-        //active is during an experiment, between start and end time
+    private:
+
+        int m_counter;
+        int experiment_state;
+
+        // INACTIVE is for prior to and after an experiment
+        // WAITING is before start time
+        // ACTIVE is during an experiment, between start and end time
         // INACTIVE -> WAITING -> ACTIVE -> INACTIVE
         enum timeState {INACTIVE=0, WAITING=1, ACTIVE=2};
+
+        enum buttonColour {GREEN=0, GRAY=1, RED=2};
+
         QPushButton *testConnectionButton;
         //QPushButton *startPedControlButton;
         QPushButton *startVideoRecButton;
         QPushButton *abortVideoRecButton;
         QPushButton *showVideoButton;
-        QPushButton *recvGPSDetailsButton;
+        QPushButton *receiveNodePositionsButton;
+
         QLCDNumber *countDown;
         QTextEdit *statusBox;
         QLabel *countDownLabel;
-        ConnectionManager connectionManager;
-        VideoConnectionManager videoRecorder;
+
         QTimer *starttimer;
         QTimer *endtimer;
         QTimer *countdowntimer;
@@ -56,9 +66,14 @@ class Window : public QWidget
         time_t strtUnixTime;
         time_t stopUnixTime;
         time_t currentUnixTime;
-        int experiment_state;
-        void initGUI(void);
+
+        ConnectionManager connectionManager;
+        HeaderArmFiles headerarmfiles;
+        VideoConnectionManager videoRecorder;
         NetworkManager client;
+
+        void initGUI(void);
+
 
     private slots:
         void connectionTestButtonClicked(void);
@@ -69,9 +84,7 @@ class Window : public QWidget
         void CountDownButtonClicked(void);
         void abortVideoRecordingButtonClicked(void);
         void showVideoButtonClicked(void);
-        void recvGPSDetailsButtonClicked(void);
-        char* stringToCharPntr(string str);
-        string replaceCharsinStr(string str_in, char ch_in, char ch_out);
+        void receiveNodePositionsButtonClicked(void);
 
     signals:
     public slots:
