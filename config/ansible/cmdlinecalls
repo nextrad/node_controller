@@ -1,0 +1,9 @@
+# Update nodes armtime
+ansible nodes -m copy -a "src=~/Desktop/AnsiNext/armtime.cfg dest=~/Desktop/NextGPSDO/armtime.cfg"
+
+# Fetch gps info file
+ansible nodes -m fetch -a "src=~/Desktop/NextGPSDO/gps_info.cfg dest=~/Desktop/AnsiNext/"
+
+# Push latest version to nodes
+ansible nodes -m copy -a "src=~/Desktop/NextGPSDO/GPS_Nextrad dest=~/Desktop/NextGPSDO/GPS_Nextrad" && ansible nodes -m copy -a "src=~/Desktop/NextGPSDO/run_GPS_Nextrad.sh dest=~/Desktop/NextGPSDO/run_GPS_Nextrad.sh"
+
