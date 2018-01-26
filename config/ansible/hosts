@@ -9,32 +9,101 @@
 #   - A hostname/ip can be a member of multiple groups
 
 [nodes]
-
-cnc ansible_host=nextrad@192.168.1.100
-node0 ansible_host=node0@192.168.1.11
-node1 ansible_host=node1@192.168.1.21
-node2 ansible_host=node2@192.168.1.31
-
+node0 ansible_host=192.168.1.11
+node1 ansible_host=192.168.1.21
+node2 ansible_host=192.168.1.31
 
 [nodes:vars]
 
 ansible_connection=ssh 
-ansible_ssh_user=root 
+#ansible_ssh_user=root 
 ansible_ssh_pass=1234
 
-[nodesroot]
 
-cncroot ansible_host=root@192.168.1.100
-node0root ansible_host=root@192.168.1.11
-node1root ansible_host=root@192.168.1.21
-node2root ansible_host=root@192.168.1.31
+[cobalts]
+cobalt0 ansible_host=192.168.1.15
+cobalt1 ansible_host=192.168.1.25
+cobalt2 ansible_host=192.168.1.35  #ssh transceiversystem@cobalt2
 
-
-[nodesroot:vars]
+[cobalts:vars]
 
 ansible_connection=ssh 
-ansible_ssh_user=root 
-ansible_ssh_pass=1234
+ansible_ssh_user=transceiversystem 
+ansible_ssh_pass=ts1234
+
+
+[tcus]
+tcu0 ansible_host=192.168.1.16
+tcu1 ansible_host=192.168.1.26
+tcu2 ansible_host=192.168.1.36
+
+[tcus:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+[cameras]
+cam0 ansible_host=192.168.1.14
+cam1 ansible_host=192.168.1.24
+cam2 ansible_host=192.168.1.34
+
+[cameras:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+[bullets]
+ap0 ansible_host=192.168.1.12
+ap1 ansible_host=192.168.1.22
+ap2 ansible_host=192.168.1.32
+sta0 ansible_host=192.168.1.13
+sta1 ansible_host=192.168.1.23
+sta2 ansible_host=192.168.1.33
+
+[bullets:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=nextradar
+
+
+[switches]
+cncswitch ansible_host=192.168.1.99
+switch0 ansible_host=192.168.1.10
+switch1 ansible_host=192.168.1.20
+switch2 ansible_host=192.168.1.30
+
+[routers:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+
+
+
+
+
+
+
+# [nodesroot]
+
+# cncroot ansible_host=root@192.168.1.100
+# node0root ansible_host=root@192.168.1.11
+# node1root ansible_host=root@192.168.1.21
+# node2root ansible_host=root@192.168.1.31
+
+
+# [nodesroot:vars]
+
+# ansible_connection=ssh 
+# ansible_ssh_user=root 
+# ansible_ssh_pass=1234
 
 
 # Ex 1: Ungrouped hosts, specify before any group headers.
