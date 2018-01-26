@@ -31,12 +31,12 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 #define HEADER_PATH                 "/home/nextrad/Documents/nextrad_header/" HEADER_FILE
 
 #define GPS_INFO_FILE               "gps_info.ini"
-#define CNC_NODE0_GPS_INFO_PATH     "/home/nextrad/Documents/cnc_controller/node0/gps_info.ini"
-#define CNC_NODE1_GPS_INFO_PATH     "/home/nextrad/Documents/cnc_controller/node1/gps_info.ini"
-#define CNC_NODE2_GPS_INFO_PATH     "/home/nextrad/Documents/cnc_controller/node2/gps_info.ini"
-#define NODE_NODE0_GPS_INFO_PATH    "/home/nextrad/Documents/node_controller/node0/gps_info.ini"
-#define NODE_NODE1_GPS_INFO_PATH    "/home/nextrad/Documents/node_controller/node1/gps_info.ini"
-#define NODE_NODE2_GPS_INFO_PATH    "/home/nextrad/Documents/node_controller/node2/gps_info.ini"
+#define CNC_NODE0_GPS_INFO_PATH     "home/nextrad/Documents/cnc_controller/build/node0/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
+#define CNC_NODE1_GPS_INFO_PATH     "home/nextrad/Documents/cnc_controller/build/node1/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
+#define CNC_NODE2_GPS_INFO_PATH     "home/nextrad/Documents/cnc_controller/build/node2/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
+#define NODE_NODE0_GPS_INFO_PATH    "home/nextrad/Documents/node_controller/build/node0/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
+#define NODE_NODE1_GPS_INFO_PATH    "home/nextrad/Documents/node_controller/build/node1/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
+#define NODE_NODE2_GPS_INFO_PATH    "home/nextrad/Documents/node_controller/build/node2/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
 
 #define ICON_PATH                   "../media/icons/favicon2.ico"
 #define TONES_PATH                  "../media/tones/"

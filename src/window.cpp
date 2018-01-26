@@ -154,6 +154,7 @@ void Window::receiveNodePositionsButtonClicked(void)
     receiveNodePosition(NODE_ID);
 
     statusBox->append("");
+    statusBox->setTextColor("black");
 }
 
 //=============================================================================
@@ -166,54 +167,69 @@ void Window::receiveNodePosition(int node_num)
     int ret;
     string lat, lon, ht;
 
-    ss << "ansible node" << node_num << " -m fetch -a \"src=~/Desktop/NextGPSDO/gps_info.cfg dest=~/Documents/cnc_controller/node"  << node_num << "/\"";
-    cout << ss.str().c_str() << endl;
-
-    status = system(stringToCharPntr(ss.str()));
-    if (-1 != status)
+    try
     {
-        ret = WEXITSTATUS(status);
+        ss << "ansible node" << node_num << " -m fetch -a \"src=~/Desktop/NextGPSDO/gps_info.ini dest=~/Documents/node_controller/" << "\"";
+        cout << ss.str().c_str() << endl;
 
-        if (ret==0)
+        status = system(stringToCharPntr(ss.str()));
+        if (-1 != status)
         {
-            // Parse gpsinfo.ini file
-            lat = headerarmfiles.readFromGPSInfoFile(node_num,"LATITUDE");
-            lon = headerarmfiles.readFromGPSInfoFile(node_num,"LONGITUDE");
-            ht = headerarmfiles.readFromGPSInfoFile(node_num,"ALTITUDE");
+            ret = WEXITSTATUS(status);
 
-             // Update Header file
-            switch (node_num)
+            if (ret==0)
             {
-                case 0: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_HT", ht);
-                        break;
-                case 1: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_HT", ht);
-                        break;
-                case 2: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_HT", ht);
-                        break;
+                // Parse gpsinfo.ini file
+                lat = headerarmfiles.readFromGPSInfoFile(node_num,"LATITUDE");
+                lon = headerarmfiles.readFromGPSInfoFile(node_num,"LONGITUDE");
+                ht = headerarmfiles.readFromGPSInfoFile(node_num,"ALTITUDE");
+
+                if ((lat == "Fault") || (lon == "Fault") || (ht == "Fault"))
+                {
+                    // Display data on screen in red X per node
+                    statusBox->setTextColor("red");
+                    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+                }
+                else
+                {
+                    // Update Header file
+                    switch (node_num)
+                    {
+                        case 0: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LAT", lat);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_LON", lon);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE0_LOCATION_HT", ht);
+                                break;
+                        case 1: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LAT", lat);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_LON", lon);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE1_LOCATION_HT", ht);
+                                break;
+                        case 2: headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LAT", lat);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_LON", lon);
+                                headerarmfiles.writeToHeaderFile("GeometrySettings", "NODE2_LOCATION_HT", ht);
+                                break;
+                    }
+
+                    // Display data on screen in green values per node
+                    statusBox->setTextColor("green");
+                    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
+                                + "lat=" + QString::fromStdString(lat) + ", \tlong=" + QString::fromStdString(lon) + ", \tht=" + QString::fromStdString(ht));
+                }
             }
-
-            // Display data on screen in green values per node
-            statusBox->setTextColor("green");
-            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
-                        + "lat=" + QString::fromStdString(lat) + ", \tlong=" + QString::fromStdString(lon) + ", \tht=" + QString::fromStdString(ht));
+            else
+            {
+                // Display data on screen in red X per node
+                statusBox->setTextColor("red");
+                statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+            }
         }
-        else
-        {
-            // Display data on screen in red X per node
-            statusBox->setTextColor("red");
-            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
-        }
+        ss.str("");             //clear stringstream
+        statusBox->append("");
     }
-    ss.str("");             //clear stringstream
-    statusBox->append("");
+    catch(exception &e)
+    {
+        cout << "receiveNodePosition exception: " << e.what() << endl;
+    }
 }
-
 
 //=======================================================================
 // abortVideoRecordingButtonClicked()

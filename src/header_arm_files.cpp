@@ -85,11 +85,12 @@ string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
     }
 
     //Read from header file
+
     std::ifstream check (path);
-    if (!check.good())
+    if (check.good() != 1)
     {
         printf("Please check location of gps info file and try again.\n");
-        exit(EXIT_FAILURE);
+        return "Fault";
     }
 
     CSimpleIniA ini;
@@ -102,3 +103,4 @@ string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
 
     return value;
 }
+
