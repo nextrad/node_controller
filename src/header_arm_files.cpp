@@ -74,18 +74,9 @@ string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
 {
     string path;
 
-    switch (nodeno)
-    {
-        case 0: path = NODE_NODE0_GPS_INFO_PATH;
-                break;
-        case 1: path = NODE_NODE1_GPS_INFO_PATH;
-                break;
-        case 2: path = NODE_NODE2_GPS_INFO_PATH;
-                break;
-    }
+    path = NODE_GPS_INFO_PATH;
 
     //Read from header file
-
     std::ifstream check (path);
     if (check.good() != 1)
     {
