@@ -12,8 +12,6 @@
 
 HeaderArmFiles::HeaderArmFiles(void)
 {
-
-
 }
 
 //=============================================================================
@@ -70,7 +68,7 @@ QString HeaderArmFiles::readFromHeaderFile(string section, string var)
 // readFromGPSInfoFile()
 //=============================================================================
 //method to return a variable's value from a GPSInfo file
-string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
+string HeaderArmFiles::readFromGPSInfoFile(string var)
 {
     string path;
 
@@ -89,6 +87,36 @@ string HeaderArmFiles::readFromGPSInfoFile(int nodeno, string var)
     ini.LoadFile(path.c_str());
 
     std::string value = (ini.GetValue("", var.c_str()));
+
+    check.close();
+
+    return value;
+}
+
+
+//=============================================================================
+// readFromBearingsFile()
+//=============================================================================
+//method to return a variable's value from a Bearings file
+string HeaderArmFiles::readFromBearingsFile(string section, string var)
+{
+    string path;
+
+    path = NODE_BEARINGS_PATH;
+
+    //Read from header file
+    std::ifstream check (path);
+    if (check.good() != 1)
+    {
+        printf("Please check location of bearings file and try again.\n");
+        return "Fault";
+    }
+
+    CSimpleIniA ini;
+
+    ini.LoadFile(path.c_str());
+
+    std::string value = (ini.GetValue(section.c_str(), var.c_str()));
 
     check.close();
 

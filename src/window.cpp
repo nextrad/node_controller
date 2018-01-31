@@ -102,14 +102,19 @@ void Window::initGUI(void)
     receiveNodePositionsButton->setGeometry(15, 120, 140, 50);
     connect(receiveNodePositionsButton, SIGNAL (clicked(bool)), this, SLOT(receiveNodePositionsButtonClicked(void)));
 
+    //button for receiving bearings
+    receiveBearingsButton = new QPushButton("Receive Node\nBearings", this);
+    receiveBearingsButton->setGeometry(15, 170, 140, 50);
+    connect(receiveBearingsButton, SIGNAL (clicked(bool)), this, SLOT(receiveBearingsButtonClicked(void)));
+
     //button to show the video recording
     showVideoButton = new QPushButton("Show Video\nFeed", this);
-    showVideoButton->setGeometry(15, 170, 140, 50);
+    showVideoButton->setGeometry(15, 220, 140, 50);
     connect(showVideoButton, SIGNAL (clicked(bool)), this, SLOT(showVideoButtonClicked(void)));
 
     //button to abort the video recording
     abortVideoRecButton = new QPushButton("Abort\nVideo Recording", this);
-    abortVideoRecButton->setGeometry(15, 220, 140, 50);
+    abortVideoRecButton->setGeometry(15, 270, 140, 50);
     connect(abortVideoRecButton, SIGNAL (clicked(bool)), this, SLOT(abortVideoRecordingButtonClicked(void)));
 }
 
@@ -167,9 +172,9 @@ void Window::receiveNodePosition(int node_num)
     try
     {
         // Parse gpsinfo.ini file
-        lat = headerarmfiles.readFromGPSInfoFile(node_num,"LATITUDE");
-        lon = headerarmfiles.readFromGPSInfoFile(node_num,"LONGITUDE");
-        ht = headerarmfiles.readFromGPSInfoFile(node_num,"ALTITUDE");
+        lat = headerarmfiles.readFromGPSInfoFile("LATITUDE");
+        lon = headerarmfiles.readFromGPSInfoFile("LONGITUDE");
+        ht = headerarmfiles.readFromGPSInfoFile("ALTITUDE");
 
         if ((lat == "Fault") || (lon == "Fault") || (ht == "Fault"))
         {
@@ -207,6 +212,128 @@ void Window::receiveNodePosition(int node_num)
     catch(exception &e)
     {
         cout << "receiveNodePosition exception: " << e.what() << endl;
+    }
+}
+
+//=============================================================================
+// receiveBearingsButtonClicked()
+// method to receive the bearings from the GPSDO.
+//=============================================================================
+
+void Window::receiveBearingsButtonClicked(void)
+{
+    statusBox->append("");
+    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Fetching Bearings file");
+    statusBox->append("");
+
+    receiveBearings(NODE_ID);
+
+    statusBox->append("");
+    statusBox->setTextColor("black");
+}
+
+//=============================================================================
+// receiveBearings()
+/*
+[TargetSettings]
+
+; lats and longs are in decimal degrees
+; height is in meters as WGS84 and above geoid
+TGT_LOCATION_LAT = -34.1874
+TGT_LOCATION_LON = 18.4280
+TGT_LOCATION_HT = 0.0235
+
+[Bearings]
+
+; DTG is date-time (in date-time group format) of getting bearings. EXAMPLE: 091630Z JUL 11 = 1630 UTC on 9 July 2011
+; Baseline_Bisector and node ranges are in meters
+; Node bearings are in degrees relative to true north
+DTG = "061855Z 1217"
+BASELINE_BISECTOR = 2
+NODE0_RANGE = 1.82952
+NODE0_BEARING = 46.5192
+NODE1_RANGE = 1.82952
+NODE1_BEARING = 46.5192
+NODE2_RANGE = 1.82952
+NODE2_BEARING = 46.5192
+*/
+//=============================================================================
+void Window::receiveBearings(int node_num)
+{
+    string lat, lon, ht, dtg, baseline_bisector, range, bearing;
+
+    try
+    {
+        // Parse tardat2cc.ini file
+        lat = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_LAT");
+        lon = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_LON");
+        ht = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_HT");
+
+        dtg = headerarmfiles.readFromBearingsFile("Bearings", "DTG");
+        baseline_bisector = headerarmfiles.readFromBearingsFile("Bearings", "BASELINE_BISECTOR");
+
+        switch (node_num)
+        {
+        case 0: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE0_RANGE");
+                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE0_BEARING");
+                break;
+        case 1: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE1_RANGE");
+                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE1_BEARING");
+                break;
+        case 2: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE2_RANGE");
+                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE2_BEARING");
+                break;
+        }
+
+        if ((lat == "Fault") || (lon == "Fault") || (ht == "Fault"))
+        {
+            // Display data on screen in red X per node
+            statusBox->setTextColor("red");
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+        }
+        else
+        {
+            // Update Header file
+            headerarmfiles.writeToHeaderFile("Bearings", "DTG", dtg);
+            headerarmfiles.writeToHeaderFile("Bearings", "BASELINE_BISECTOR", baseline_bisector);
+
+            switch (node_num)
+            {
+                case 0: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_RANGE", range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_BEARING", bearing);
+                        break;
+                case 1: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_RANGE", range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_BEARING", bearing);
+                        break;
+                        break;
+                case 2: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
+                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_RANGE", range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_BEARING", bearing);
+                        break;
+                        break;
+            }
+
+            // Display data on screen in green values per node
+            statusBox->setTextColor("green");
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
+                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon) + "\tht=" + QString::fromStdString(ht) + "\n " \
+                        + "DTG=" + QString::fromStdString(dtg) + "\tbaseline_bisector=" + QString::fromStdString(baseline_bisector) + "\n " \
+                        + "range=" + QString::fromStdString(range) + "\tbearing=" + QString::fromStdString(bearing));
+        }
+
+        statusBox->append("");
+    }
+    catch(exception &e)
+    {
+        cout << "receiveBearings exception: " << e.what() << endl;
     }
 }
 

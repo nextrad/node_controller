@@ -30,6 +30,7 @@ class Window : public QWidget
         explicit Window(QWidget *parent = 0);
         QString getCountDownTime(time_t timeLeft);
         void receiveNodePosition(int node_num);
+        void receiveBearings(int node_num);
         string replaceCharsinStr(string str_in, char ch_in, char ch_out);
         char* stringToCharPntr(string str);
         string setButtonColour(int colourno);
@@ -53,6 +54,7 @@ class Window : public QWidget
         QPushButton *abortVideoRecButton;
         QPushButton *showVideoButton;
         QPushButton *receiveNodePositionsButton;
+        QPushButton *receiveBearingsButton;
 
         QLCDNumber *countDown;
         QTextEdit *statusBox;
@@ -85,6 +87,7 @@ class Window : public QWidget
         void abortVideoRecordingButtonClicked(void);
         void showVideoButtonClicked(void);
         void receiveNodePositionsButtonClicked(void);
+        void receiveBearingsButtonClicked(void);
 
     signals:
     public slots:
