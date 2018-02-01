@@ -87,7 +87,8 @@ void Window::initGUI(void)
 
     //Status output box for text output
     statusBox = new QTextEdit(this);
-    statusBox->setGeometry(170, 70, 415, 200); //180);
+    statusBox->setGeometry(170, 70, 415, 200);
+    statusBox->setTextColor("black");
 
     //countdown LCD number set to bottom right
     countDown = new QLCDNumber(8, this);
@@ -248,7 +249,7 @@ n1: Bearing	46.5192
 //=============================================================================
 void Window::receiveBearings(int node_num)
 {
-    string lat, lon, ht, dtg, baseline_bisector;
+    string lat, lon, dtg, baseline_bisector;
     string n0range, n0bearing, n1range, n1bearing, n2range, n2bearing;
 
     try
@@ -257,7 +258,6 @@ void Window::receiveBearings(int node_num)
         dtg = headerarmfiles.readFromBearingsFile("DTG", 4, 12);
         lat = headerarmfiles.readFromBearingsFile("Lat", 11, 8);
         lon = headerarmfiles.readFromBearingsFile("Lon", 16, 5);
-        ht = "0.00";
         baseline_bisector = headerarmfiles.readFromBearingsFile("BASELINE_BISECTOR", 16, 5);
         n0range = headerarmfiles.readFromBearingsFile("n0: Range", 10, 7);
         n0bearing = headerarmfiles.readFromBearingsFile("n0: Bearing", 12, 7);
@@ -279,7 +279,7 @@ void Window::receiveBearings(int node_num)
             headerarmfiles.writeToHeaderFile("Bearings", "BASELINE_BISECTOR", baseline_bisector);
             headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
             headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
-            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
+            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", "0.00");
 
             switch (node_num)
             {
@@ -297,7 +297,7 @@ void Window::receiveBearings(int node_num)
             // Display data on screen in green values per node
             statusBox->setTextColor("green");
             statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon) + "\tht=" + QString::fromStdString(ht) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "\tlong=" + QString::fromStdString(lon) + "\n" \
                         + "DTG=" + QString::fromStdString(dtg) + "\tbaseline_bisector=" + QString::fromStdString(baseline_bisector));
 
             switch(node_num)
