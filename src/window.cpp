@@ -10,6 +10,8 @@
 //Revision:             3.0 (Jan/Feb 2017)
 //Edited By:            Shirley Coetzee and Darryn Jordan
 //Revision:             4.0 (Dec 2017)
+//Edited By:            Shirley Coetzee, Darryn Jordan and Simon Lewis
+//Revision:             5.0 (Jan 2018)
 
 //=======================================================================
 // Includes
@@ -223,7 +225,7 @@ void Window::receiveNodePosition(int node_num)
 void Window::receiveBearingsButtonClicked(void)
 {
     statusBox->append("");
-    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Fetching Bearings file");
+    statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Fetching node bearings file from Mission Control");
     statusBox->append("");
 
     receiveBearings(NODE_ID);
@@ -234,99 +236,79 @@ void Window::receiveBearingsButtonClicked(void)
 
 //=============================================================================
 // receiveBearings()
-/*
-[TargetSettings]
 
-; lats and longs are in decimal degrees
-; height is in meters as WGS84 and above geoid
-TGT_LOCATION_LAT = -34.1874
-TGT_LOCATION_LON = 18.4280
-TGT_LOCATION_HT = 0.0235
+/*  tardat2cc.rtf
+(*171207*)
 
-[Bearings]
-
-; DTG is date-time (in date-time group format) of getting bearings. EXAMPLE: 091630Z JUL 11 = 1630 UTC on 9 July 2011
-; Baseline_Bisector and node ranges are in meters
-; Node bearings are in degrees relative to true north
-DTG = "061855Z 1217"
-BASELINE_BISECTOR = 2
-NODE0_RANGE = 1.82952
-NODE0_BEARING = 46.5192
-NODE1_RANGE = 1.82952
-NODE1_BEARING = 46.5192
-NODE2_RANGE = 1.82952
-NODE2_BEARING = 46.5192
+DTG	061855Z 1217
+Target Lat/Lon 	{-34.1813,18.46}
+n1: Range	1.82952
+n1: Bearing	46.5192
 */
 //=============================================================================
 void Window::receiveBearings(int node_num)
 {
-    string lat, lon, ht, dtg, baseline_bisector, range, bearing;
+    string lat, lon, ht, dtg, baseline_bisector;
+    string n0range, n0bearing, n1range, n1bearing, n2range, n2bearing;
 
     try
     {
-        // Parse tardat2cc.ini file
-        lat = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_LAT");
-        lon = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_LON");
-        ht = headerarmfiles.readFromBearingsFile("TargetSettings", "TGT_LOCATION_HT");
+        // Parse tardat2cc.rtf file
+        dtg = headerarmfiles.readFromBearingsFile("DTG", 4, 12);
+        lat = headerarmfiles.readFromBearingsFile("Lat", 11, 8);
+        lon = headerarmfiles.readFromBearingsFile("Lon", 16, 5);
+        ht = "0.00";
+        baseline_bisector = headerarmfiles.readFromBearingsFile("BASELINE_BISECTOR", 16, 5);
+        n0range = headerarmfiles.readFromBearingsFile("n0: Range", 10, 7);
+        n0bearing = headerarmfiles.readFromBearingsFile("n0: Bearing", 12, 7);
+        n1range = headerarmfiles.readFromBearingsFile("n1: Range", 10, 7);
+        n1bearing = headerarmfiles.readFromBearingsFile("n1: Bearing", 12, 7);
+        n2range = headerarmfiles.readFromBearingsFile("n2: Range", 10, 7);
+        n2bearing = headerarmfiles.readFromBearingsFile("n2: Bearing", 12, 7);
 
-        dtg = headerarmfiles.readFromBearingsFile("Bearings", "DTG");
-        baseline_bisector = headerarmfiles.readFromBearingsFile("Bearings", "BASELINE_BISECTOR");
-
-        switch (node_num)
-        {
-        case 0: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE0_RANGE");
-                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE0_BEARING");
-                break;
-        case 1: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE1_RANGE");
-                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE1_BEARING");
-                break;
-        case 2: range = headerarmfiles.readFromBearingsFile("Bearings", "NODE2_RANGE");
-                bearing = headerarmfiles.readFromBearingsFile("Bearings", "NODE2_BEARING");
-                break;
-        }
-
-        if ((lat == "Fault") || (lon == "Fault") || (ht == "Fault"))
+        if ((lat == "Fault") || (lon == "Fault") || (dtg == "Fault"))
         {
             // Display data on screen in red X per node
             statusBox->setTextColor("red");
-            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "\tnode" + QString::number(node_num));
         }
         else
         {
             // Update Header file
             headerarmfiles.writeToHeaderFile("Bearings", "DTG", dtg);
             headerarmfiles.writeToHeaderFile("Bearings", "BASELINE_BISECTOR", baseline_bisector);
+            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
+            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
+            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
 
             switch (node_num)
             {
-                case 0: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_RANGE", range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_BEARING", bearing);
+                case 0: headerarmfiles.writeToHeaderFile("Bearings", "NODE0_RANGE", n0range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_BEARING", n0bearing);
                         break;
-                case 1: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_RANGE", range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_BEARING", bearing);
+                case 1: headerarmfiles.writeToHeaderFile("Bearings", "NODE1_RANGE", n1range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_BEARING", n1bearing);
                         break;
-                        break;
-                case 2: headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
-                        headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", ht);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_RANGE", range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_BEARING", bearing);
-                        break;
+                case 2: headerarmfiles.writeToHeaderFile("Bearings", "NODE2_RANGE", n2range);
+                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_BEARING", n2bearing);
                         break;
             }
 
             // Display data on screen in green values per node
             statusBox->setTextColor("green");
-            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
-                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon) + "\tht=" + QString::fromStdString(ht) + "\n " \
-                        + "DTG=" + QString::fromStdString(dtg) + "\tbaseline_bisector=" + QString::fromStdString(baseline_bisector) + "\n " \
-                        + "range=" + QString::fromStdString(range) + "\tbearing=" + QString::fromStdString(bearing));
+            statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon) + "\tht=" + QString::fromStdString(ht) + "\n" \
+                        + "DTG=" + QString::fromStdString(dtg) + "\tbaseline_bisector=" + QString::fromStdString(baseline_bisector));
+
+            switch(node_num)
+            {
+            case 0: statusBox->append("n0 range=" + QString::fromStdString(n0range) + "\tn0 bearing=" + QString::fromStdString(n0bearing));
+                    break;
+            case 1: statusBox->append("n1 range=" + QString::fromStdString(n1range) + "\tn1 bearing=" + QString::fromStdString(n1bearing));
+                    break;
+            case 2: statusBox->append("n2 range=" + QString::fromStdString(n2range) + "\tn2 bearing=" + QString::fromStdString(n2bearing));
+                    break;
+            }
         }
 
         statusBox->append("");

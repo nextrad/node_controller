@@ -26,4 +26,5 @@ HEADERS += \
     video_connection_manager.h \
     networkmanager.hpp \
     header_arm_files.h \
-    datetime.h
+    datetime.h \
+    SimpleIni.h

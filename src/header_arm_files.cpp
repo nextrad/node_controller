@@ -3,15 +3,17 @@
 //Author:       Shirley Coetzee
 //Created:      December 2017
 //Version       1.0 (December 2017)
+//Edited By:    Shirley Coetzee, Darryn Jordan and Simon Lewis
+//Revision:     2.0 (Jan 2018)
 
 
-#include "includes.h"
-#include "parameters.h"
 #include "header_arm_files.h"
+
 
 
 HeaderArmFiles::HeaderArmFiles(void)
 {
+
 }
 
 //=============================================================================
@@ -98,9 +100,9 @@ string HeaderArmFiles::readFromGPSInfoFile(string var)
 // readFromBearingsFile()
 //=============================================================================
 //method to return a variable's value from a Bearings file
-string HeaderArmFiles::readFromBearingsFile(string section, string var)
+string HeaderArmFiles::readFromBearingsFile(string var, int offset, int strsize)
 {
-    string path;
+    string path, data;
 
     path = NODE_BEARINGS_PATH;
 
@@ -112,14 +114,17 @@ string HeaderArmFiles::readFromBearingsFile(string section, string var)
         return "Fault";
     }
 
-    CSimpleIniA ini;
+    std::string line;
+    while ( std::getline( check, line ) )
+    {
+        std::size_t found = line.find(var);
+        if (found!=std::string::npos)
+        {
+          data = line.substr(found+offset,strsize);
+          break;
+        }
+    }
 
-    ini.LoadFile(path.c_str());
-
-    std::string value = (ini.GetValue(section.c_str(), var.c_str()));
-
-    check.close();
-
-    return value;
+    return data;
 }
 
