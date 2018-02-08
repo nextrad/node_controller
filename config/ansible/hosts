@@ -1,0 +1,142 @@
+# This is the default ansible 'hosts' file.
+#
+# It should live in /etc/ansible/hosts
+#
+#   - Comments begin with the '#' character
+#   - Blank lines are ignored
+#   - Groups of hosts are delimited by [header] elements
+#   - You can enter hostnames or ip addresses
+#   - A hostname/ip can be a member of multiple groups
+
+[nodes]
+node0 ansible_host=192.168.1.11
+node1 ansible_host=192.168.1.21
+node2 ansible_host=192.168.1.31
+
+[nodes:vars]
+
+ansible_connection=ssh 
+#ansible_ssh_user=root 
+ansible_ssh_pass=1234
+
+
+[cobalts]
+cobalt0 ansible_host=192.168.1.15
+cobalt1 ansible_host=192.168.1.25
+cobalt2 ansible_host=192.168.1.35  #ssh transceiversystem@cobalt2
+
+[cobalts:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=transceiversystem 
+ansible_ssh_pass=ts1234
+
+
+[tcus]
+tcu0 ansible_host=192.168.1.16
+tcu1 ansible_host=192.168.1.26
+tcu2 ansible_host=192.168.1.36
+
+[tcus:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+[cameras]
+cam0 ansible_host=192.168.1.14
+cam1 ansible_host=192.168.1.24
+cam2 ansible_host=192.168.1.34
+
+[cameras:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+[bullets]
+ap0 ansible_host=192.168.1.12
+ap1 ansible_host=192.168.1.22
+ap2 ansible_host=192.168.1.32
+sta0 ansible_host=192.168.1.13
+sta1 ansible_host=192.168.1.23
+sta2 ansible_host=192.168.1.33
+
+[bullets:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=nextradar
+
+
+[switches]
+cncswitch ansible_host=192.168.1.99
+switch0 ansible_host=192.168.1.10
+switch1 ansible_host=192.168.1.20
+switch2 ansible_host=192.168.1.30
+
+[routers:vars]
+
+ansible_connection=ssh 
+ansible_ssh_user=ubnt 
+ansible_ssh_pass=ubnt
+
+
+
+
+
+
+
+
+
+# [nodesroot]
+
+# cncroot ansible_host=root@192.168.1.100
+# node0root ansible_host=root@192.168.1.11
+# node1root ansible_host=root@192.168.1.21
+# node2root ansible_host=root@192.168.1.31
+
+
+# [nodesroot:vars]
+
+# ansible_connection=ssh 
+# ansible_ssh_user=root 
+# ansible_ssh_pass=1234
+
+
+# Ex 1: Ungrouped hosts, specify before any group headers.
+
+## green.example.com
+## blue.example.com
+## 192.168.100.1
+## 192.168.100.10
+
+# Ex 2: A collection of hosts belonging to the 'webservers' group
+
+## [webservers]
+## alpha.example.org
+## beta.example.org
+## 192.168.1.100
+## 192.168.1.110
+
+# If you have multiple hosts following a pattern you can specify
+# them like this:
+
+## www[001:006].example.com
+
+# Ex 3: A collection of database servers in the 'dbservers' group
+
+## [dbservers]
+## 
+## db01.intranet.mydomain.net
+## db02.intranet.mydomain.net
+## 10.25.1.56
+## 10.25.1.57
+
+# Here's another example of host ranges, this time there are no
+# leading 0s:
+
+## db-[99:101]-node.example.com
+

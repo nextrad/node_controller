@@ -4,6 +4,8 @@
 //For:              Radar Group NeXtRAD
 //Created:          April 2016
 //Last  Edited:     January 2017
+//Edited By:        Shirley Coetzee and Darryn Jordan
+//Revision:         2.0 (Dec 2017)
 
 #include <QApplication>
 #include <QPushButton>
@@ -13,12 +15,15 @@
 #include "video_connection_manager.h"
 
 int NODE_ID;
+int EXPERIMENT_LENGTH;
 string RTSP_HOST;
 string OUTPUT_DIRECTORY;
 string OVERLAY_IMAGE;
 
+
 void testNTP(void);
 void setParameters(void);
+
 
 int main(int argc, char **argv)
 {
@@ -26,14 +31,13 @@ int main(int argc, char **argv)
     setParameters();
 
     QApplication app (argc, argv);
-    QIcon icon("favicon2.ico");
+    QIcon icon(ICON_PATH);
     Window window;
     window.setWindowIcon(icon); //Set Icon for application
     window.show();
 
     app.exec();
     return 0;
-
 }
 
 void testNTP(void)
@@ -41,7 +45,7 @@ void testNTP(void)
     system("sudo service ntp status > ntpStatus.txt"); //write the status of the NTP server to ntpStatus.txt
 
     //read status from text file
-    ifstream ntpstatus ("ntpStatus.txt");
+    ifstream ntpstatus ("../tmp/ntpStatus.txt");
     printf("\nntpStatus.txt opened\n");
     string temp;
     getline(ntpstatus,temp);
@@ -70,6 +74,8 @@ void setParameters(void)
 
         OVERLAY_IMAGE = "/home/nextrad/Documents/Video/overlay_images/crosshair_1080p.png";
         OUTPUT_DIRECTORY = "/home/nextrad/Documents/Video/output/";
+        EXPERIMENT_LENGTH = 60;  //default value [seconds]
+
 
         switch (nodeNo)
         {
