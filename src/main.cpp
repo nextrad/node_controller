@@ -13,7 +13,6 @@
 #include <QApplication>
 #include <QPushButton>
 #include "mainwindow.h"
-#include "window.h"
 #include "includes.h"
 #include "parameters.h"
 #include "video_connection_manager.h"
