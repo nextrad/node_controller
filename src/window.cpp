@@ -39,6 +39,8 @@ Window::Window(QWidget *parent) : QWidget(parent)
     //Set size of window
     setMinimumSize(600,400); //FixedSize(600,400);
 
+    // Delete existing header file.
+
     initGUI();
 
     //start vlc telnet server, connect and configure
