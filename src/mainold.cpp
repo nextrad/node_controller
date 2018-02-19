@@ -6,13 +6,10 @@
 //Last  Edited:     January 2017
 //Edited By:        Shirley Coetzee and Darryn Jordan
 //Revision:         2.0 (Dec 2017)
-//Edited By:        Shirley Coetzee
-//Revision:         3.0 (Feb 2018)
-
 
 #include <QApplication>
 #include <QPushButton>
-#include "mainwindow.h"
+#include "window.h"
 #include "includes.h"
 #include "parameters.h"
 #include "video_connection_manager.h"
@@ -35,7 +32,7 @@ int main(int argc, char **argv)
 
     QApplication app (argc, argv);
     QIcon icon(ICON_PATH);
-    MainWindow window;
+    Window window;
     window.setWindowIcon(icon); //Set Icon for application
     window.show();
 
