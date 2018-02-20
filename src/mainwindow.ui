@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Hello Application</string>
+   <string>NeXtRAD Application</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QLabel" name="label">
@@ -102,7 +102,7 @@ recording active</string>
        </property>
        <property name="text">
         <string>Check Network
-Connection</string>
+Connections</string>
        </property>
       </widget>
      </item>

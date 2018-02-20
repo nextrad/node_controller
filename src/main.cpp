@@ -30,7 +30,7 @@ void setParameters(void);
 
 int main(int argc, char **argv)
 {
-    testNTP();
+  //  testNTP();
     setParameters();
 
     QApplication app (argc, argv);

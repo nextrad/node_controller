@@ -34,6 +34,11 @@ private slots:
 
     void on_abortVideoRecButton_clicked();
 
+    void startRecording(void);
+    void stopRecording(void);
+    void updateCountDownLCD(void);
+
+
 private:
     Ui::MainWindow *ui;
 
@@ -68,12 +73,11 @@ private:
 
     char* stringToCharPntr(string str);
 
-    void updateCountDownLCD(void);
     QString getCountDownTime(time_t timeLeft);
+
     string replaceCharsinStr(string str_in, char ch_in, char ch_out);
+
     void CountDownButtonClicked(void);
-    void startRecording(void);
-    void stopRecording(void);
 
 };
 
