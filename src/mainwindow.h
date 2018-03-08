@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "connection_manager.h"
 #include "video_connection_manager.h"
-#include "networkmanager.hpp"
 #include "includes.h"
 #include "parameters.h"
 #include "datetime.h"
@@ -44,6 +43,7 @@ private:
 
     int m_counter;
     int experiment_state;
+    bool first_time;
 
     // INACTIVE is for prior to and after an experiment
     // WAITING is before start time
@@ -65,19 +65,20 @@ private:
     ConnectionManager connectionManager;
     HeaderArmFiles headerarmfiles;
     VideoConnectionManager videoRecorder;
-    NetworkManager client;
+
+    bool testConnection(string address);
+
+    char* stringToCharPntr(string str);
 
     void receiveNodePosition(int node_num);
 
     void receiveBearings(int node_num);
 
-    char* stringToCharPntr(string str);
-
     QString getCountDownTime(time_t timeLeft);
 
     string replaceCharsinStr(string str_in, char ch_in, char ch_out);
 
-    void CountDownButtonClicked(void);
+    void CheckCountdown(void);
 
 };
 

@@ -1,6 +1,6 @@
 //Author:               Darryn Jordan
 //Edited By:            David Bissett
-//Class:                NetworkManager
+//Class:                ConnectionManager
 //For:                  University of Cape Town, Dept. Elec. Eng., RRSG NeXtRAD
 //Created:              November 2015
 //Last Edited:          April 2016

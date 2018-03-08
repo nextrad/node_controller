@@ -41,6 +41,7 @@ MainWindow::MainWindow(QWidget *parent) :
       ui(new Ui::MainWindow)
 {
     experiment_state = INACTIVE; //see enum for explanation
+    first_time = true;
 
     ui->setupUi(this);
 
@@ -84,48 +85,38 @@ MainWindow::~MainWindow()
 
 //=======================================================================
 // connectionTestButtonClicked()
-// Tests the connection to CNC
+// Tests the connection to CnC
 // and polls for Header File
 //=======================================================================
 void MainWindow::on_testConnectionButton_clicked()
 {
-    ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Testing Connection...");
-    connectionManager.connectionTest();
-    if(connectionManager.isConnected())
-    {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connected to network");
-        ui->testConnectionButton->setText("Connected");
-        ui->testConnectionButton->setStyleSheet("* { background-color: rgb(100,255,125) }");
 
-        if(client.isServerConnected())
-        {
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Server Already Connected");
-        }
-        else
-        {
-            client.connectToCNC();
-            if(!client.isServerConnected())
-            {
-                //if connection refused then most likely the cnc server isn't running
-                ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Error Connecting to Server");
-                ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Check Terminal for Error");
-            }
-        }
+    //Test if CnC is connected
+    string name = "cnc";
+    string address = "192.168.1.100";
+
+    bool conn2CnC = testConnection(address);
+    if (conn2CnC)
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
     }
     else
     {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Not Connected to Network");
-        ui->testConnectionButton->setText("Not connected");
-        ui->testConnectionButton->setStyleSheet("* { background-color: rgb(255,125,100) }");
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
     }
 
+    ui->statusBox->append("");
+    ui->statusBox->setTextColor("black");
 
-    int attempt = 0;
 
-    // Poll for new Header file
-    if ((connectionManager.isConnected()) && (client.isServerConnected()))
+    if (conn2CnC && !first_time)
     {
-        // Read Header file
+
+        int attempt = 0;
+
+        // Poll for new Header file
         ifstream headerFile (HEADER_PATH);
 
         while(!headerFile.is_open())
@@ -138,10 +129,54 @@ void MainWindow::on_testConnectionButton_clicked()
         headerFile.close();
 
         // Start countdown to armtime
-        CountDownButtonClicked ();
+        CheckCountdown ();
+
     }
+
+    first_time = false;
+    ui->statusBox->setTextColor("black");
+    ui->countdownLabel->setText("");
 }
 
+//=============================================================================
+// testConnection()
+// pings an address to see if it's connected to the network.
+//=============================================================================
+bool MainWindow::testConnection(string address)
+{
+    string command = "ping -c 1 ";  // where c = count
+    command.append(address);
+
+    int status = system(stringToCharPntr(command));
+    if (-1 != status)
+    {
+        int ping_ret = WEXITSTATUS(status);
+
+        if(ping_ret==0)
+        {
+            cout<<"Ping successful"<<endl; //Proceed
+            return true;
+        }
+        else
+        {
+            cout<<"Ping not successful"<<endl; //Sleep and again check for ping
+            return false;
+        }
+    }
+
+    return false;
+}
+
+//=============================================================================
+// stringToCharPntr()
+// Takes in a string and converts it to char*
+//=============================================================================
+char* MainWindow::stringToCharPntr(string str)
+{
+    char *cstr = new char[str.length() + 1];
+    strcpy(cstr, str.c_str());
+    return cstr;
+}
 
 //=============================================================================
 // receiveNodePositionsButtonClicked()
@@ -158,6 +193,7 @@ void MainWindow::on_receiveNodePositionsButton_clicked()
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
+    ui->countdownLabel->setText("");
 }
 
 //=============================================================================
@@ -206,6 +242,8 @@ void MainWindow::receiveNodePosition(int node_num)
         }
 
         ui->statusBox->append("");
+        ui->statusBox->setTextColor("black");
+        ui->countdownLabel->setText("");
     }
     catch(exception &e)
     {
@@ -228,19 +266,18 @@ void MainWindow::on_receiveBearingsButton_clicked()
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
+    ui->countdownLabel->setText("");
 }
 
 //=============================================================================
 // receiveBearings()
 
-/*  tardat2cc.rtf
-(*171207*)
-
-DTG	061855Z 1217
-Target Lat/Lon 	{-34.1813,18.46}
-n1: Range	1.82952
-n1: Bearing	46.5192
-*/
+//  tardat2cc.rtf
+// (*171207*)
+// DTG	061855Z 1217
+// Target Lat/Lon 	{-34.1813,18.46}
+// n1: Range	1.82952
+// n1: Bearing	46.5192
 //=============================================================================
 void MainWindow::receiveBearings(int node_num)
 {
@@ -307,6 +344,8 @@ void MainWindow::receiveBearings(int node_num)
         }
 
         ui->statusBox->append("");
+        ui->statusBox->setTextColor("black");
+        ui->countdownLabel->setText("");
     }
     catch(exception &e)
     {
@@ -329,16 +368,6 @@ void MainWindow::on_showVideoButton_clicked()
     system(stringToCharPntr(ss.str()));
 }
 
-//=======================================================================
-// stringToCharPntr()
-//=======================================================================
-char* MainWindow::stringToCharPntr(string str)
-{
-    char *cstr = new char[str.length() + 1];
-    strcpy(cstr, str.c_str());
-    return cstr;
-}
-
 
 //=======================================================================
 // abortVideoRecordingButtonClicked()
@@ -359,7 +388,9 @@ void MainWindow::on_abortVideoRecButton_clicked()
     }
     experiment_state = INACTIVE;
     ui->countdownLabel->setText("Video recording aborted!");
+    ui->statusBox->setTextColor("black");
     ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording aborted!");
+
 }
 
 //=======================================================================
@@ -398,10 +429,11 @@ QString MainWindow::getCountDownTime(time_t timeLeft)
 //=======================================================================
 // startPedControlButtonClicked()
 //=======================================================================
-/*This method opens the pedestal controller program.
-TODO At the moment this program hangs when the pedestal controller opens.
-This is because they are open on the same thread. Multithreading or forking is needed to fix this.
-*//*
+/*
+// This method opens the pedestal controller program.
+// TODO At the moment this program hangs when the pedestal controller opens.
+// This is because they are open on the same thread. Multithreading or forking is needed to fix this.
+
 void Window::startPedControlButtonClicked(void)
 {
     stringstream ss;
@@ -425,11 +457,11 @@ string MainWindow::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 
 
 //=======================================================================
-// CountDownButtonClicked()
+// CheckCountdown()
 // Start countdown to armtime
 //=======================================================================
 //This method parses the start and end times for the video recording and starts the countdown starttimer
-void MainWindow::CountDownButtonClicked(void)
+void MainWindow::CheckCountdown(void)
 {
     Datetime datetime;
     stringstream ss_unixtime;
@@ -472,8 +504,11 @@ void MainWindow::CountDownButtonClicked(void)
         ui->countdownLabel->setText("Countdown to armtime");
         experiment_state = WAITING;
         ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to armtime");
-        ui->statusBox->append("");
     }
+
+    ui->statusBox->append("");
+    ui->statusBox->setTextColor("black");
+    ui->countdownLabel->setText("");
 }
 
 

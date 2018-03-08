@@ -50,8 +50,7 @@
      </font>
     </property>
     <property name="text">
-     <string>No countdown to audio
-recording active</string>
+     <string/>
     </property>
    </widget>
    <widget class="QTextEdit" name="statusBox">
@@ -87,7 +86,7 @@ recording active</string>
      <rect>
       <x>10</x>
       <y>80</y>
-      <width>131</width>
+      <width>136</width>
       <height>421</height>
      </rect>
     </property>
