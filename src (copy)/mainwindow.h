@@ -66,7 +66,9 @@ private:
     HeaderArmFiles headerarmfiles;
     VideoConnectionManager videoRecorder;
 
-    void checkForHeaderFile(void);
+ //   void * checkForHeaderFile(void * threadarg);
+
+    int createThreads();
 
     bool testConnection(string address);
 

@@ -89,14 +89,14 @@ MainWindow::~MainWindow()
 }
 
 //=======================================================================
-// checkForHeaderFile
-// Checks if received latest Header File and sets newheaderfile to true if so
+// blah
 //=======================================================================
-void MainWindow::checkForHeaderFile(void)
+void * checkForHeaderFile(void * threadarg)
 {
 
-    HeaderArmFiles headerarmfiles;
     QString daynew, hournew, minutenew, secondnew;
+
+    HeaderArmFiles *my_data = (HeaderArmFiles *)threadarg;
 
     cout << "Polling for header file, attempt: " << attempt++ << endl;
 
@@ -106,16 +106,19 @@ void MainWindow::checkForHeaderFile(void)
     if (headerFile.is_open())
     {
         // read armtime from Header File values
-        daynew = headerarmfiles.readFromHeaderFile("Timing", "DAY");
-        hournew = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
-        minutenew = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
-        secondnew = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
+        daynew = my_data->readFromHeaderFile("Timing", "DAY");
+        hournew = my_data->readFromHeaderFile("Timing", "HOUR");
+        minutenew = my_data->readFromHeaderFile("Timing", "MINUTE");
+        secondnew = my_data->readFromHeaderFile("Timing", "SECOND");
+
+//        cout << daynew.toStdString() << " " << hournew.toStdString() << " " << minutenew.toStdString() << " " << secondnew.toStdString() << " " << endl;
+//        cout << dayold.toStdString() << " " << hourold.toStdString() << " " << minuteold.toStdString() << " " << secondold.toStdString() << " " << endl;
 
         headerFile.close();
 
         bool sametime = ((daynew == dayold) && (hournew == hourold) &&
                      (minutenew == minuteold) && (secondnew == secondold));
-
+        //cout << "sametime = " << sametime << endl;
         if (!sametime)
         {
             cout << "Received Header File" << endl;
@@ -127,6 +130,46 @@ void MainWindow::checkForHeaderFile(void)
             minuteold = minutenew;
             secondold = secondnew;
         }
+    }
+}
+
+
+//=======================================================================
+// blah
+//=======================================================================
+int MainWindow::createThreads()
+{
+    int rc;
+    pthread_t thread_polling;
+    pthread_attr_t attr;
+    void *status;
+    HeaderArmFiles headerarmfiles;
+
+    // Initialize and set thread joinable
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+    rc = pthread_create(&thread_polling, NULL, checkForHeaderFile, (void * )&headerarmfiles );
+    if (rc)
+    {
+       cout << "Error:unable to create thread," << rc << endl;
+       exit(-1);
+    }
+
+    // free attribute and wait for thread to finish
+    pthread_attr_destroy(&attr);
+
+    rc = pthread_join(thread_polling, &status);
+    if (rc)
+    {
+      cout << "Error:unable to join," << rc << endl;
+      exit(-1);
+    }
+
+    if (newheaderfile == true)
+    {
+        checkCountdown();
+        newheaderfile = false;
     }
 }
 
@@ -417,13 +460,9 @@ void MainWindow::on_abortVideoRecButton_clicked()
 //=======================================================================
 // updateCountDownLCD()
 // Updates the countdown LCD every second.
-//
-// Also checks if received latest Header File
-// If so, calls checkCountdown() and sets newheaderfile to false
 //=======================================================================
 void MainWindow::updateCountDownLCD(void)
 {
-
     currentUnixTime = time(NULL);
     if (experiment_state == INACTIVE)
     {
@@ -438,14 +477,7 @@ void MainWindow::updateCountDownLCD(void)
         ui->Countdown->display(getCountDownTime(stopUnixTime - currentUnixTime));
     }
 
-    checkForHeaderFile();
-
-    if (newheaderfile == true)
-    {
-        checkCountdown();
-        newheaderfile = false;
-    }
-
+    createThreads();
 }
 
 
