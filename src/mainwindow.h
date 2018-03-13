@@ -69,6 +69,7 @@ private:
     void checkForHeaderFile(void);
 
     bool testConnection(string address);
+    void testSubNetwork(QString NetID);
 
     char* stringToCharPntr(string str);
 

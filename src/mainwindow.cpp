@@ -13,7 +13,7 @@
 //Edited By:            Shirley Coetzee, Darryn Jordan and Simon Lewis
 //Revision:             5.0 (Jan 2018)
 //Edited By:            Shirley Coetzee
-//Revision:             6.0 (Feb 2018)
+//Revision:             6.0 (Feb/Mar 2018)
 
 
 //=======================================================================
@@ -98,7 +98,7 @@ void MainWindow::checkForHeaderFile(void)
     HeaderArmFiles headerarmfiles;
     QString daynew, hournew, minutenew, secondnew;
 
-    cout << "Polling for header file, attempt: " << attempt++ << endl;
+//   cout << "Polling for header file, attempt: " << attempt++ << endl;
 
      // Poll for new Header file
     ifstream headerFile (HEADER_PATH);
@@ -137,7 +137,6 @@ void MainWindow::checkForHeaderFile(void)
 //=======================================================================
 void MainWindow::on_testConnectionButton_clicked()
 {
-
     //Test if CnC is connected
     string name = "cnc";
     string address = "192.168.1.100";
@@ -157,6 +156,139 @@ void MainWindow::on_testConnectionButton_clicked()
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
 
+
+    testSubNetwork("1");
+    testSubNetwork("2");
+    testSubNetwork("3");
+
+    ui->statusBox->setTextColor("black");
+    ui->countdownLabel->setText("");
+}
+
+//=============================================================================
+// testSubNetwork()
+// Tests the connections to CNC
+//=============================================================================
+void MainWindow::testSubNetwork(QString NetID)
+{
+    string temp, name;
+    string address = "192.168.1.";
+    address.append(NetID.toUtf8().constData());
+    NetID = QString::number(NetID.toInt() - 1);    //This is because the node numbering actually starts from zero.
+
+    //Test if Access Point bullet is connected
+    name = "ap";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("2");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if STAtion bullet is connected
+    name = "sta";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("3");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if PoE Switch is connected
+    name = "switch";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("0");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if Node Laptop is connected
+    name = "node";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("1");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if IP camera is connected
+    name = "cam";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("4");
+    if(!testConnection(temp))                   //Cameras have no ssh port and more security so it's easier to ping them
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if Cobalt is connected
+    name = "cobalt";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("5");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    //Test if TCUs is connected
+    name = "tcu";
+    name.append(NetID.toUtf8().constData());
+    temp = address;
+    temp.append("6");
+    if(!testConnection(temp))
+    {
+        ui->statusBox->setTextColor("red");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + QString::fromStdString(name) );
+    }
+    else
+    {
+        ui->statusBox->setTextColor("green");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + QString::fromStdString(name) );
+    }
+
+    ui->statusBox->append("");
 
 }
 
