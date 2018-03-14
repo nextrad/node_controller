@@ -35,7 +35,7 @@ private slots:
 
     void startRecording(void);
     void stopRecording(void);
-    void updateCountDownLCD(void);
+    void updateCountDownLCDAndPollHeaderFile(void);
 
 
 private:
@@ -66,7 +66,7 @@ private:
     HeaderArmFiles headerarmfiles;
     VideoConnectionManager videoRecorder;
 
-    void checkForHeaderFile(void);
+    bool checkForNewHeaderFile(void);
 
     bool testConnection(string address);
     void testSubNetwork(QString NetID);

@@ -26,7 +26,6 @@
 #include <QApplication>
 #include <QDateTime>
 
-bool newheaderfile;
 int attempt;
 QString dayold, hourold, minuteold, secondold;
 
@@ -45,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
       ui(new Ui::MainWindow)
 {
 
-    newheaderfile = false;
     attempt = 0;
     experiment_state = INACTIVE; //see enum for explanation
 
@@ -72,10 +70,10 @@ MainWindow::MainWindow(QWidget *parent) :
     endtimer->setSingleShot(true);
     connect(endtimer, SIGNAL(timeout()), this, SLOT(stopRecording()));
 
-    //the count down timer calls updateCountDownLCD() every second
+    //the count down timer calls updateCountDownLCDAndPollHeaderFile() every second
     countdowntimer = new QTimer(this);
     countdowntimer->setInterval(1000);
-    connect(countdowntimer, SIGNAL(timeout()), this, SLOT(updateCountDownLCD()));
+    connect(countdowntimer, SIGNAL(timeout()), this, SLOT(updateCountDownLCDAndPollHeaderFile()));
     countdowntimer->start(1000);
 
 }
@@ -86,48 +84,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-//=======================================================================
-// checkForHeaderFile
-// Checks if received latest Header File and sets newheaderfile to true if so
-//=======================================================================
-void MainWindow::checkForHeaderFile(void)
-{
-
-    HeaderArmFiles headerarmfiles;
-    QString daynew, hournew, minutenew, secondnew;
-
-//   cout << "Polling for header file, attempt: " << attempt++ << endl;
-
-     // Poll for new Header file
-    ifstream headerFile (HEADER_PATH);
-    headerFile.open(HEADER_PATH);
-    if (headerFile.is_open())
-    {
-        // read armtime from Header File values
-        daynew = headerarmfiles.readFromHeaderFile("Timing", "DAY");
-        hournew = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
-        minutenew = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
-        secondnew = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
-
-        headerFile.close();
-
-        bool sametime = ((daynew == dayold) && (hournew == hourold) &&
-                     (minutenew == minuteold) && (secondnew == secondold));
-
-        if (!sametime)
-        {
-            cout << "Received Header File" << endl;
-            newheaderfile = true;
-
-            // Save datetime
-            dayold = daynew;
-            hourold = hournew;
-            minuteold = minutenew;
-            secondold = secondnew;
-        }
-    }
 }
 
 //=======================================================================
@@ -547,13 +503,55 @@ void MainWindow::on_abortVideoRecButton_clicked()
 }
 
 //=======================================================================
-// updateCountDownLCD()
-// Updates the countdown LCD every second.
-//
-// Also checks if received latest Header File
-// If so, calls checkCountdown() and sets newheaderfile to false
+// checkForNewHeaderFile
+// Checks if received new Header File
 //=======================================================================
-void MainWindow::updateCountDownLCD(void)
+bool MainWindow::checkForNewHeaderFile(void)
+{
+
+    HeaderArmFiles headerarmfiles;
+    QString daynew, hournew, minutenew, secondnew;
+
+   cout << "Polling for header file, attempt: " << attempt++ << endl;
+
+     // Poll for new Header file
+    ifstream headerFile (HEADER_PATH);
+    headerFile.open(HEADER_PATH);
+    if (headerFile.is_open())
+    {
+        // read armtime from Header File values
+        daynew = headerarmfiles.readFromHeaderFile("Timing", "DAY");
+        hournew = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
+        minutenew = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
+        secondnew = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
+
+        headerFile.close();
+
+        if ((daynew != dayold) || (hournew != hourold) ||
+            (minutenew != minuteold) || (secondnew != secondold))
+        {
+            cout << "Received new Header File" << endl;
+
+            // Save datetime
+            dayold = daynew;
+            hourold = hournew;
+            minuteold = minutenew;
+            secondold = secondnew;
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//=======================================================================
+// updateCountDownLCDAndPollHeaderFile()
+// Updates the countdown LCD every second depending on experiment_state.
+// Also checks if received latest Header File
+// If so, calls checkCountdown()
+//=======================================================================
+void MainWindow::updateCountDownLCDAndPollHeaderFile(void)
 {
 
     currentUnixTime = time(NULL);
@@ -570,14 +568,11 @@ void MainWindow::updateCountDownLCD(void)
         ui->Countdown->display(getCountDownTime(stopUnixTime - currentUnixTime));
     }
 
-    checkForHeaderFile();
 
-    if (newheaderfile == true)
+    if ((checkForNewHeaderFile() == true) && (attempt > 1))
     {
         checkCountdown();
-        newheaderfile = false;
     }
-
 }
 
 
