@@ -56,7 +56,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->Countdown->display("00:00:00");
 
     //start vlc telnet server, connect and configure
-    system("x-terminal-emulator -e \"vlc -I telnet\n\"");
+    int status = system("x-terminal-emulator -e \"vlc -I telnet\n\"");
+    if (0 != status)
+    {
+        cout << "x-terminal-emulator failed to start." << endl;
+    }
     videoRecorder.connectToSocket();
     videoRecorder.configureVideoStream();
 
@@ -87,9 +91,8 @@ MainWindow::~MainWindow()
 }
 
 //=======================================================================
-// connectionTestButtonClicked()
-// Tests the connection to CnC
-// and polls for Header File
+// on_testConnectionButton_clicked()
+// Tests the connection to NeXtRAD network
 //=======================================================================
 void MainWindow::on_testConnectionButton_clicked()
 {
@@ -474,7 +477,11 @@ void MainWindow::on_showVideoButton_clicked()
     ss << " --width=500 rtsp://";
     ss << RTSP_HOST;
     ss << "/live/video/profile1\"";
-    system(stringToCharPntr(ss.str()));
+    int status = system(stringToCharPntr(ss.str()));
+    if (-1 != status)
+    {
+        cout << "Failed to show video." << endl;
+    }
 }
 
 
@@ -512,7 +519,9 @@ bool MainWindow::checkForNewHeaderFile(void)
     HeaderArmFiles headerarmfiles;
     QString daynew, hournew, minutenew, secondnew;
 
-   cout << "Polling for header file, attempt: " << attempt++ << endl;
+    attempt++;
+
+//   cout << "Polling for header file, attempt: " << attempt << endl;
 
      // Poll for new Header file
     ifstream headerFile (HEADER_PATH);
@@ -530,7 +539,10 @@ bool MainWindow::checkForNewHeaderFile(void)
         if ((daynew != dayold) || (hournew != hourold) ||
             (minutenew != minuteold) || (secondnew != secondold))
         {
-            cout << "Received new Header File" << endl;
+            if (attempt > 1)
+            {
+                cout << "Received new Header File" << endl;
+            }
 
             // Save datetime
             dayold = daynew;
@@ -553,7 +565,6 @@ bool MainWindow::checkForNewHeaderFile(void)
 //=======================================================================
 void MainWindow::updateCountDownLCDAndPollHeaderFile(void)
 {
-
     currentUnixTime = time(NULL);
     if (experiment_state == INACTIVE)
     {
@@ -605,7 +616,7 @@ void Window::startPedControlButtonClicked(void)
 //=======================================================================
 string MainWindow::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 {
-    for (int i = 0; i < str_in.length(); i++)
+    for (int i = 0; i < (int)str_in.length(); i++)
     {
         if (str_in[i] == ch_in)
         {
@@ -713,7 +724,7 @@ void MainWindow::stopRecording(void)
     {
         string command;
         command = "mv " + oldRecFileName + ".mp4 " + OUTPUT_DIRECTORY + newRecFileName + ".mp4";
-        system(command.c_str());
-        cout << "Renamed video file to: " << newRecFileName << endl;
+        int status = system(command.c_str());
+        cout << "Renamed video file to: " << newRecFileName << ".mp4, status = " << status << endl;
     }
 }

@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "connection_manager.h"
 #include "video_connection_manager.h"
 #include "includes.h"
 #include "parameters.h"
@@ -62,7 +61,6 @@ private:
     time_t stopUnixTime;
     time_t currentUnixTime;
 
-    ConnectionManager connectionManager;
     HeaderArmFiles headerarmfiles;
     VideoConnectionManager videoRecorder;
 
