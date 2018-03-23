@@ -62,6 +62,11 @@
       <height>421</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Sans Serif</family>
+     </font>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="Countdown">
     <property name="geometry">

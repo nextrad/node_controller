@@ -326,7 +326,7 @@ void MainWindow::receiveNodePosition(int node_num)
         {
             // Display data on screen in red X per node
             ui->statusBox->setTextColor("red");
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "node" + QString::number(node_num));
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + "node" + QString::number(node_num));
         }
         else
         {
@@ -349,8 +349,8 @@ void MainWindow::receiveNodePosition(int node_num)
 
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "                      long=" + QString::fromStdString(lon) + "\n" \
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "                    long=" + QString::fromStdString(lon) + "\n" \
                         + "ht=" + QString::fromStdString(ht));
         }
 
@@ -414,7 +414,7 @@ void MainWindow::receiveBearings(int node_num)
         {
             // Display data on screen in red X per node
             ui->statusBox->setTextColor("red");
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X    ") + "\tnode" + QString::number(node_num));
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      X     ") + "\tnode" + QString::number(node_num));
         }
         else
         {
@@ -439,10 +439,9 @@ void MainWindow::receiveBearings(int node_num)
 
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
                         + "DTG=" + QString::fromStdString(dtg) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "                      long=" + QString::fromStdString(lon));
-
+                        + "lat=" + QString::fromStdString(lat) + "                    long=" + QString::fromStdString(lon));
 
             switch(node_num)
             {
