@@ -349,8 +349,9 @@ void MainWindow::receiveNodePosition(int node_num)
 
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n " \
-                        + "lat=" + QString::fromStdString(lat) + ", \tlong=" + QString::fromStdString(lon) + ", \tht=" + QString::fromStdString(ht));
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "                      long=" + QString::fromStdString(lon) + "\n" \
+                        + "ht=" + QString::fromStdString(ht));
         }
 
         ui->statusBox->append("");
@@ -440,16 +441,16 @@ void MainWindow::receiveBearings(int node_num)
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
                         + "DTG=" + QString::fromStdString(dtg) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon));
+                        + "lat=" + QString::fromStdString(lat) + "                      long=" + QString::fromStdString(lon));
 
 
             switch(node_num)
             {
-            case 0: ui->statusBox->append("n0 range=" + QString::fromStdString(n0range) + "\tn0 bearing=" + QString::fromStdString(n0bearing));
+            case 0: ui->statusBox->append("n0 range=" + QString::fromStdString(n0range) + "           n0 bearing=" + QString::fromStdString(n0bearing));
                     break;
-            case 1: ui->statusBox->append("n1 range=" + QString::fromStdString(n1range) + "\tn1 bearing=" + QString::fromStdString(n1bearing));
+            case 1: ui->statusBox->append("n1 range=" + QString::fromStdString(n1range) + "           n1 bearing=" + QString::fromStdString(n1bearing));
                     break;
-            case 2: ui->statusBox->append("n2 range=" + QString::fromStdString(n2range) + "\tn2 bearing=" + QString::fromStdString(n2bearing));
+            case 2: ui->statusBox->append("n2 range=" + QString::fromStdString(n2range) + "           n2 bearing=" + QString::fromStdString(n2bearing));
                     break;
             }
         }
