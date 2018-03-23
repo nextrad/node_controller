@@ -402,7 +402,6 @@ void MainWindow::receiveBearings(int node_num)
         dtg = headerarmfiles.readFromBearingsFile("DTG", 4, 12);
         lat = headerarmfiles.readFromBearingsFile("Lat", 11, 8);
         lon = headerarmfiles.readFromBearingsFile("Lon", 16, 5);
-        baseline_bisector = headerarmfiles.readFromBearingsFile("BASELINE_BISECTOR", 16, 5);
         n0range = headerarmfiles.readFromBearingsFile("n0: Range", 10, 7);
         n0bearing = headerarmfiles.readFromBearingsFile("n0: Bearing", 12, 7);
         n1range = headerarmfiles.readFromBearingsFile("n1: Range", 10, 7);
@@ -420,7 +419,6 @@ void MainWindow::receiveBearings(int node_num)
         {
             // Update Header file
             headerarmfiles.writeToHeaderFile("Bearings", "DTG", dtg);
-            headerarmfiles.writeToHeaderFile("Bearings", "BASELINE_BISECTOR", baseline_bisector);
             headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
             headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
             headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", "0.00");
@@ -441,8 +439,9 @@ void MainWindow::receiveBearings(int node_num)
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _    ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "\tlong=" + QString::fromStdString(lon) + "\n" \
-                        + "DTG=" + QString::fromStdString(dtg) + "\tbaseline_bisector=" + QString::fromStdString(baseline_bisector));
+                        + "DTG=" + QString::fromStdString(dtg) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "\t\tlong=" + QString::fromStdString(lon));
+
 
             switch(node_num)
             {
