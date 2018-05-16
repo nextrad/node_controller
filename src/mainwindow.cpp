@@ -394,7 +394,7 @@ void MainWindow::on_receiveBearingsButton_clicked()
 //=============================================================================
 void MainWindow::receiveBearings(int node_num)
 {
-    string lat, lon, dtg, baseline_bisector;
+    string lat, lon, dtg;
     string n0range, n0bearing, n1range, n1bearing, n2range, n2bearing;
 
     try
