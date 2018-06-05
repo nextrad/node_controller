@@ -26,14 +26,6 @@ string Datetime::getTimeAndDate(const char *format)
     return dateTime;
 }
 //=============================================================================
-/*
-time_t now = time(0);
-struct tm tstruct;
-char buf[80];
-tstruct = *localtime(&now);
-strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
-*/
-//=============================================================================
 string Datetime::getNowPlusSecs(int secs)
 {
     QDateTime eTime = QDateTime::currentDateTime();
