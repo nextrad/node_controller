@@ -6,10 +6,13 @@
 //Last  Edited:     January 2017
 //Edited By:        Shirley Coetzee and Darryn Jordan
 //Revision:         2.0 (Dec 2017)
+//Edited By:        Shirley Coetzee
+//Revision:         3.0 (Feb 2018)
+
 
 #include <QApplication>
 #include <QPushButton>
-#include "window.h"
+#include "mainwindow.h"
 #include "includes.h"
 #include "parameters.h"
 #include "video_connection_manager.h"
@@ -27,12 +30,12 @@ void setParameters(void);
 
 int main(int argc, char **argv)
 {
-    testNTP();
+  //  testNTP();
     setParameters();
 
     QApplication app (argc, argv);
     QIcon icon(ICON_PATH);
-    Window window;
+    MainWindow window;
     window.setWindowIcon(icon); //Set Icon for application
     window.show();
 
@@ -42,19 +45,27 @@ int main(int argc, char **argv)
 
 void testNTP(void)
 {
-    system("sudo service ntp status > ntpStatus.txt"); //write the status of the NTP server to ntpStatus.txt
+    int status = system("sudo service ntp status > ntpStatus.txt"); //write the status of the NTP server to ntpStatus.txt
+    if (0 != status)
+    {
+        cout << "Failed to record ntp status." << endl;
+    }
 
     //read status from text file
     ifstream ntpstatus ("../tmp/ntpStatus.txt");
     printf("\nntpStatus.txt opened\n");
     string temp;
     getline(ntpstatus,temp);
-    printf(temp.c_str());
+    printf("%s", temp.c_str());
     printf("\n");
 
     if(temp.find("not running") != string::npos) //if it finds the substring 'not running'
     {
-        system("sudo service ntp start");
+        int status = system("sudo service ntp start");
+        if (0 != status)
+        {
+            cout << "Failed to start ntp service." << endl;
+        }
         printf("\n");
     }
     printf("\n");
@@ -64,7 +75,6 @@ void setParameters(void)
 {
     int nodeNo;
     bool gotDetailsOK = false;
-
 
     while (!gotDetailsOK)
     {

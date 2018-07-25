@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctime>
+#include <cstdlib>
+#include <pthread.h>
+#include <unistd.h>
+
 
 using namespace boost::asio;
 using namespace std;

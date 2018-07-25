@@ -11,20 +11,18 @@ QMAKE_CXXFLAGS += -std=c++0x -pthread   #using c++11 and multithreading
 
 SOURCES += \
     main.cpp \
-    connection_manager.cpp \
+	mainwindow.cpp \
     video_connection_manager.cpp \
-    networkmanager.cpp \
-    window.cpp \
     datetime.cpp \
     header_arm_files.cpp
 
 HEADERS += \
-    window.h \
-    connection_manager.h \
+    mainwindow.h \
     parameters.h \
     includes.h \
     video_connection_manager.h \
-    networkmanager.hpp \
     header_arm_files.h \
     datetime.h \
     SimpleIni.h
+
+FORMS    += mainwindow.ui
