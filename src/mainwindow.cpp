@@ -396,10 +396,11 @@ void MainWindow::on_calcBearingsButton_clicked()
 
 //=============================================================================
 // calcBearings()
-//
-// var p1 = new LatLon(-34.19269, 18.44571);
-// var p2 = new LatLon(-34.18126, 18.46009);
-// var b2 = p1.bearingTo(p2); // 46.14°
+// Calculate bearing from node position and target position.
+// e.g.
+// p1 = new LatLon(-34.19269, 18.44571);
+// p2 = new LatLon(-34.18126, 18.46009);
+// b2 = p1.bearingTo(p2); // 46.14°
 //
 //=============================================================================
 void MainWindow::calcBearings(int node_num)
@@ -462,6 +463,75 @@ void MainWindow::calcBearings(int node_num)
     {
         cout << "calcBearings exception: " << e.what() << endl;
     }
+}
+
+
+//=======================================================================
+// Returns the radians from the input measured in degrees.
+//=======================================================================
+
+double MainWindow::toRadians (double degs) {
+        return degs * M_PI / 180;
+}
+
+
+//=======================================================================
+// Returns the degrees from the input measured in radians.
+//=======================================================================
+
+double MainWindow::toDegrees (double rads) {
+    return rads * 180 / M_PI;
+}
+
+
+//=======================================================================
+//
+// Returns the (initial) bearing from ‘this’ point to destination point.
+//
+// @param   {LatLon} point - Latitude/longitude of destination point.
+// @returns {number} Initial bearing in degrees from north.
+//
+// @example
+//     var p1 = new LatLon(52.205, 0.119);
+//     var p2 = new LatLon(48.857, 2.351);
+//     var b1 = p1.bearingTo(p2); // 156.2°
+//
+//=======================================================================
+
+double MainWindow::bearingTo(Point here, Point there)
+{
+    // tanθ = sinΔλ⋅cosφ2 / cosφ1⋅sinφ2 − sinφ1⋅cosφ2⋅cosΔλ
+    // see mathforum.org/library/drmath/view/55417.html for derivation
+
+    double ang1 = toRadians(here.lat);
+    double ang2 = toRadians(there.lat);
+    double londiff = toRadians(there.lon-here.lon);
+    double y = sin(londiff) * cos(ang2);
+    double x = cos(ang1)*sin(ang2) -
+            sin(ang1)*cos(ang2)*cos(londiff);
+    double brg = atan2(y, x);
+
+    return std::fmod((toDegrees(brg)+360), 360);
+}
+
+
+//=======================================================================
+// Returns final bearing arriving at destination destination point from ‘this’ point; the final bearing
+// will differ from the initial bearing by varying degrees according to distance and latitude.
+//
+// @param   {LatLon} point - Latitude/longitude of destination point.
+// @returns {number} Final bearing in degrees from north.
+//
+// @example
+//     var p1 = new LatLon(52.205, 0.119);
+//     var p2 = new LatLon(48.857, 2.351);
+//     var b2 = p1.finalBearingTo(p2); // 157.9°
+//=======================================================================
+
+double MainWindow::finalBearingTo (Point here, Point there)
+{
+    // get initial bearing from destination point to this point & reverse it by adding 180°
+    return std::fmod(( bearingTo(here, there)+180 ), 360);
 }
 
 
@@ -726,101 +796,4 @@ void MainWindow::stopRecording(void)
     }
 }
 
-
-
-
-double MainWindow::toRadians (double degs) {
-        return degs * M_PI / 180;
-}
-
-double MainWindow::toDegrees (double rads) {
-    return rads * 180 / M_PI;
-}
-
-/**
- * Returns the distance from ‘this’ point to destination point (using haversine formula).
- *
- * @param   {LatLon} point - Latitude/longitude of destination point.
- * @param   {number} [radius=6371e3] - (Mean) radius of earth (defaults to radius in metres).
- * @returns {number} Distance between this point and destination point, in same units as radius.
- *
- * @example
- *     var p1 = new LatLon(52.205, 0.119);
- *     var p2 = new LatLon(48.857, 2.351);
- *     var d = p1.distanceTo(p2); // 404.3 km
- */
-/*
-double MainWindow::distanceTo(double point, double radius) {
-    //if (!(point instanceof LatLon)) throw new TypeError('point is not LatLon object');
-    double radius = (radius == undefined) ? 6371e3 : Number(radius);
-
-    // a = sin²(Δφ/2) + cos(φ1)⋅cos(φ2)⋅sin²(Δλ/2)
-    // tanδ = √(a) / √(1−a)
-    // see mathforum.org/library/drmath/view/51879.html for derivation
-
-    double R = radius;
-    double φ1 = this.lat.toRadians();
-        var  λ1 = this.lon.toRadians();
-    double φ2 = point.lat.toRadians();
-        var λ2 = point.lon.toRadians();
-    double Δφ = φ2 - φ1;
-    double Δλ = λ2 - λ1;
-
-    double sin(Δφ);
-    sin(Δφ/2) * sin(Δφ/2);
-          + Math.cos(φ1) * Math.cos(φ2)
-          * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    double d = R * c;
-
-    return d;
-}
-*/
-
-/**
- * Returns the (initial) bearing from ‘this’ point to destination point.
- *
- * @param   {LatLon} point - Latitude/longitude of destination point.
- * @returns {number} Initial bearing in degrees from north.
- *
- * @example
- *     var p1 = new LatLon(52.205, 0.119);
- *     var p2 = new LatLon(48.857, 2.351);
- *     var b1 = p1.bearingTo(p2); // 156.2°
- */
-double MainWindow::bearingTo(Point here, Point there)
-{
-    // tanθ = sinΔλ⋅cosφ2 / cosφ1⋅sinφ2 − sinφ1⋅cosφ2⋅cosΔλ
-    // see mathforum.org/library/drmath/view/55417.html for derivation
-
-    double ang1 = toRadians(here.lat);
-    double ang2 = toRadians(there.lat);
-    double londiff = toRadians(there.lon-here.lon);
-    double y = sin(londiff) * cos(ang2);
-    double x = cos(ang1)*sin(ang2) -
-            sin(ang1)*cos(ang2)*cos(londiff);
-    double brg = atan2(y, x);
-
-    return std::fmod((toDegrees(brg)+360), 360);
-}
-
-
-/**
- * Returns final bearing arriving at destination destination point from ‘this’ point; the final bearing
- * will differ from the initial bearing by varying degrees according to distance and latitude.
- *
- * @param   {LatLon} point - Latitude/longitude of destination point.
- * @returns {number} Final bearing in degrees from north.
- *
- * @example
- *     var p1 = new LatLon(52.205, 0.119);
- *     var p2 = new LatLon(48.857, 2.351);
- *     var b2 = p1.finalBearingTo(p2); // 157.9°
- */
-
-double MainWindow::finalBearingTo (Point here, Point there)
-{
-    // get initial bearing from destination point to this point & reverse it by adding 180°
-    return std::fmod(( bearingTo(here, there)+180 ), 360);
-}
 
