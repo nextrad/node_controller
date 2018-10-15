@@ -14,6 +14,9 @@
 //Revision:             5.0 (Jan 2018)
 //Edited By:            Shirley Coetzee
 //Revision:             6.0 (Feb/Mar 2018)
+//Edited By:            Shirley Coetzee
+//Revision              7.0 (Oct 2018)
+
 
 
 //=======================================================================
@@ -366,16 +369,25 @@ void MainWindow::receiveNodePosition(int node_num)
 
 
 //=============================================================================
-// receiveBearingsButtonClicked()
-// method to receive the bearings from the GPSDO.
+// on_calcBearingsButton_clicked()
+// Checks if received latest Header File
+// If so, calls calcBearings(NODE_ID);
 //=============================================================================
-void MainWindow::on_receiveBearingsButton_clicked()
+void MainWindow::on_calcBearingsButton_clicked()
 {
     ui->statusBox->append("");
-    ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Fetching node bearings file from Mission Control");
+    ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Reading Header File for target and node locations");
     ui->statusBox->append("");
 
-    receiveBearings(NODE_ID);
+    if (experiment_state != INACTIVE)
+    {
+        calcBearings(NODE_ID);
+    }
+    else
+    {
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header File not recent");
+        ui->statusBox->append("");
+    }
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
@@ -383,34 +395,39 @@ void MainWindow::on_receiveBearingsButton_clicked()
 }
 
 //=============================================================================
-// receiveBearings()
-
-//  tardat2cc.rtf
-// (*171207*)
-// DTG	061855Z 1217
-// Target Lat/Lon 	{-34.1813,18.46}
-// n1: Range	1.82952
-// n1: Bearing	46.5192
+// calcBearings()
+//
+// var p1 = new LatLon(-34.19269, 18.44571);
+// var p2 = new LatLon(-34.18126, 18.46009);
+// var b2 = p1.bearingTo(p2); // 46.14°
+//
 //=============================================================================
-void MainWindow::receiveBearings(int node_num)
+void MainWindow::calcBearings(int node_num)
 {
-    string lat, lon, dtg;
-    string n0range, n0bearing, n1range, n1bearing, n2range, n2bearing;
+    QString nodelat, nodelon, tgtlat, tgtlon;
+    double brg;
 
     try
     {
-        // Parse tardat2cc.rtf file
-        dtg = headerarmfiles.readFromBearingsFile("DTG", 4, 12);
-        lat = headerarmfiles.readFromBearingsFile("Lat", 11, 8);
-        lon = headerarmfiles.readFromBearingsFile("Lon", 16, 5);
-        n0range = headerarmfiles.readFromBearingsFile("n0: Range", 10, 7);
-        n0bearing = headerarmfiles.readFromBearingsFile("n0: Bearing", 12, 7);
-        n1range = headerarmfiles.readFromBearingsFile("n1: Range", 10, 7);
-        n1bearing = headerarmfiles.readFromBearingsFile("n1: Bearing", 12, 7);
-        n2range = headerarmfiles.readFromBearingsFile("n2: Range", 10, 7);
-        n2bearing = headerarmfiles.readFromBearingsFile("n2: Bearing", 12, 7);
+        // Get node position from Header file
+        switch (node_num)
+        {
+            case 0: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE0_LOCATION_LAT");
+                    nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE0_LOCATION_LON");
+                    break;
+            case 1: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE1_LOCATION_LAT");
+                    nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE1_LOCATION_LON");
+                    break;
+            case 2: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE2_LOCATION_LAT");
+                    nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE2_LOCATION_LON");
+                    break;
+        }
 
-        if ((lat == "Fault") || (lon == "Fault") || (dtg == "Fault"))
+        // Get node position from Header file
+        tgtlat = headerarmfiles.readFromHeaderFile("TargetSettings", "TGT_LOCATION_LAT");
+        tgtlon = headerarmfiles.readFromHeaderFile("TargetSettings", "TGT_LOCATION_LON");
+
+        if ((nodelat == "Fault") || (nodelon == "Fault") || (tgtlat == "Fault") || (tgtlon == "Fault"))
         {
             // Display data on screen in red X per node
             ui->statusBox->setTextColor("red");
@@ -418,41 +435,24 @@ void MainWindow::receiveBearings(int node_num)
         }
         else
         {
-            // Update Header file
-            headerarmfiles.writeToHeaderFile("Bearings", "DTG", dtg);
-            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LAT", lat);
-            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_LON", lon);
-            headerarmfiles.writeToHeaderFile("TargetSettings", "TGT_LOCATION_HT", "0.00");
-
-            switch (node_num)
-            {
-                case 0: headerarmfiles.writeToHeaderFile("Bearings", "NODE0_RANGE", n0range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE0_BEARING", n0bearing);
-                        break;
-                case 1: headerarmfiles.writeToHeaderFile("Bearings", "NODE1_RANGE", n1range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE1_BEARING", n1bearing);
-                        break;
-                case 2: headerarmfiles.writeToHeaderFile("Bearings", "NODE2_RANGE", n2range);
-                        headerarmfiles.writeToHeaderFile("Bearings", "NODE2_BEARING", n2bearing);
-                        break;
-            }
-
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
-                        + "DTG=" + QString::fromStdString(dtg) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "                    long=" + QString::fromStdString(lon));
+                        + "lat=" + nodelat + "                    long=" + nodelon);
+            ui->statusBox->append("");
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "target" + "\n" \
+                        + "lat=" + tgtlat + "                    long=" + tgtlon);
+            ui->statusBox->append("");
 
-            switch(node_num)
-            {
-            case 0: ui->statusBox->append("n0 range=" + QString::fromStdString(n0range) + "           n0 bearing=" + QString::fromStdString(n0bearing));
-                    break;
-            case 1: ui->statusBox->append("n1 range=" + QString::fromStdString(n1range) + "           n1 bearing=" + QString::fromStdString(n1bearing));
-                    break;
-            case 2: ui->statusBox->append("n2 range=" + QString::fromStdString(n2range) + "           n2 bearing=" + QString::fromStdString(n2bearing));
-                    break;
-            }
-        }
+            Point node, target;
+            node.lat = nodelat.toDouble();
+            node.lon = nodelon.toDouble();
+            target.lat = tgtlat.toDouble();
+            target.lon = tgtlon.toDouble();
+
+            brg = bearingTo(node, target);
+
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 4));        }
 
         ui->statusBox->append("");
         ui->statusBox->setTextColor("black");
@@ -460,7 +460,7 @@ void MainWindow::receiveBearings(int node_num)
     }
     catch(exception &e)
     {
-        cout << "receiveBearings exception: " << e.what() << endl;
+        cout << "calcBearings exception: " << e.what() << endl;
     }
 }
 
@@ -520,9 +520,7 @@ bool MainWindow::checkForNewHeaderFile(void)
 
     attempt++;
 
-//   cout << "Polling for header file, attempt: " << attempt << endl;
-
-     // Poll for new Header file
+    // Poll for new Header file
     ifstream headerFile (HEADER_PATH);
     headerFile.open(HEADER_PATH);
     if (headerFile.is_open())
@@ -727,3 +725,102 @@ void MainWindow::stopRecording(void)
         cout << "Renamed video file to: " << newRecFileName << ".mp4, status = " << status << endl;
     }
 }
+
+
+
+
+double MainWindow::toRadians (double degs) {
+        return degs * M_PI / 180;
+}
+
+double MainWindow::toDegrees (double rads) {
+    return rads * 180 / M_PI;
+}
+
+/**
+ * Returns the distance from ‘this’ point to destination point (using haversine formula).
+ *
+ * @param   {LatLon} point - Latitude/longitude of destination point.
+ * @param   {number} [radius=6371e3] - (Mean) radius of earth (defaults to radius in metres).
+ * @returns {number} Distance between this point and destination point, in same units as radius.
+ *
+ * @example
+ *     var p1 = new LatLon(52.205, 0.119);
+ *     var p2 = new LatLon(48.857, 2.351);
+ *     var d = p1.distanceTo(p2); // 404.3 km
+ */
+/*
+double MainWindow::distanceTo(double point, double radius) {
+    //if (!(point instanceof LatLon)) throw new TypeError('point is not LatLon object');
+    double radius = (radius == undefined) ? 6371e3 : Number(radius);
+
+    // a = sin²(Δφ/2) + cos(φ1)⋅cos(φ2)⋅sin²(Δλ/2)
+    // tanδ = √(a) / √(1−a)
+    // see mathforum.org/library/drmath/view/51879.html for derivation
+
+    double R = radius;
+    double φ1 = this.lat.toRadians();
+        var  λ1 = this.lon.toRadians();
+    double φ2 = point.lat.toRadians();
+        var λ2 = point.lon.toRadians();
+    double Δφ = φ2 - φ1;
+    double Δλ = λ2 - λ1;
+
+    double sin(Δφ);
+    sin(Δφ/2) * sin(Δφ/2);
+          + Math.cos(φ1) * Math.cos(φ2)
+          * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    double d = R * c;
+
+    return d;
+}
+*/
+
+/**
+ * Returns the (initial) bearing from ‘this’ point to destination point.
+ *
+ * @param   {LatLon} point - Latitude/longitude of destination point.
+ * @returns {number} Initial bearing in degrees from north.
+ *
+ * @example
+ *     var p1 = new LatLon(52.205, 0.119);
+ *     var p2 = new LatLon(48.857, 2.351);
+ *     var b1 = p1.bearingTo(p2); // 156.2°
+ */
+double MainWindow::bearingTo(Point here, Point there)
+{
+    // tanθ = sinΔλ⋅cosφ2 / cosφ1⋅sinφ2 − sinφ1⋅cosφ2⋅cosΔλ
+    // see mathforum.org/library/drmath/view/55417.html for derivation
+
+    double ang1 = toRadians(here.lat);
+    double ang2 = toRadians(there.lat);
+    double londiff = toRadians(there.lon-here.lon);
+    double y = sin(londiff) * cos(ang2);
+    double x = cos(ang1)*sin(ang2) -
+            sin(ang1)*cos(ang2)*cos(londiff);
+    double brg = atan2(y, x);
+
+    return std::fmod((toDegrees(brg)+360), 360);
+}
+
+
+/**
+ * Returns final bearing arriving at destination destination point from ‘this’ point; the final bearing
+ * will differ from the initial bearing by varying degrees according to distance and latitude.
+ *
+ * @param   {LatLon} point - Latitude/longitude of destination point.
+ * @returns {number} Final bearing in degrees from north.
+ *
+ * @example
+ *     var p1 = new LatLon(52.205, 0.119);
+ *     var p2 = new LatLon(48.857, 2.351);
+ *     var b2 = p1.finalBearingTo(p2); // 157.9°
+ */
+
+double MainWindow::finalBearingTo (Point here, Point there)
+{
+    // get initial bearing from destination point to this point & reverse it by adding 180°
+    return std::fmod(( bearingTo(here, there)+180 ), 360);
+}
+
