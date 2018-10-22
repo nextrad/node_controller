@@ -639,13 +639,18 @@ void MainWindow::updateCountDownLCDAndPollHeaderFile(void)
     }
     else if(experiment_state == WAITING)
     {
-        ui->Countdown->display(getCountDownTime(strtUnixTime - currentUnixTime));
+        if((strtUnixTime - currentUnixTime) >= 0)
+        {
+            ui->Countdown->display(getCountDownTime(strtUnixTime - currentUnixTime));
+        }
     }
     else if(experiment_state == ACTIVE)
     {
-        ui->Countdown->display(getCountDownTime(stopUnixTime - currentUnixTime));
+        if((stopUnixTime - currentUnixTime) >= 0)
+        {
+            ui->Countdown->display(getCountDownTime(stopUnixTime - currentUnixTime));
+        }
     }
-
 
     if ((checkForNewHeaderFile() == true) && (attempt > 1))
     {
@@ -875,6 +880,7 @@ bool MainWindow::checkCountdown(void)
     {
         cout << "checkCountdown exception: " << e.what() << endl;
     }
+    return true;
 }
 
 
