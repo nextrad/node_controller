@@ -90,7 +90,8 @@ private:
 
     string replaceCharsinStr(string str_in, char ch_in, char ch_out);
 
-    void checkCountdown(void);
+    int calcExperimentLength(void);
+    bool checkCountdown(void);
 
     double toRadians (double degs);
 

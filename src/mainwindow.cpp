@@ -694,58 +694,187 @@ string MainWindow::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 }
 
 
-//=======================================================================
-// CheckCountdown()
-// Start countdown to armtime
-//=======================================================================
-//This method parses the start and end times for the video recording and starts the countdown starttimer
-void MainWindow::checkCountdown(void)
+//=============================================================================
+// calcExperimentLength()
+//
+// Calc ExperimentLength from the NUM_PRIS, and the summing of each specific block in PULSES
+//=============================================================================
+int MainWindow::calcExperimentLength(void)
+{
+    int num_pris = atoi(headerarmfiles.readFromHeaderFile("PulseParameters", "NUM_PRIS").toStdString().c_str());
+
+    string pulses_str = headerarmfiles.readFromHeaderFile("PulseParameters", "PULSES").toStdString();
+    // e.g. PULSES = "5.0,1000.0,0,1300.0|10.0,2000.0,1,1300.0|10.0,3000.0,2,1300.0|10.0,4000.0,3,1300.0";
+
+    // ====================================================
+
+    // Split into blocks separated by "|", put into pulses_arr
+
+    std::string s = pulses_str;
+    std::string delimiter = "|";
+
+    // Get pulses_arr
+    vector <string> pulses_arr;
+
+    size_t pos = 0;
+    std::string token;
+    while ((pos = s.find(delimiter)) != std::string::npos) {
+        token = s.substr(0, pos);
+        pulses_arr.push_back(token);
+        s.erase(0, pos + delimiter.length());
+    }
+    pulses_arr.push_back(s);
+
+    int num_pulses_in_block = pulses_arr.size();
+
+    for (int i=0; i<num_pulses_in_block; i++)
+        cout << pulses_arr[i] << "\n";
+
+    cout << "num_pulses_in_block = " << num_pulses_in_block << std::endl  << std::endl;
+
+    // =======================================================
+
+    // Split into values separated by ",", put into block_arr
+
+    std::string::size_type sz;   // alias of size_t
+    int tblock = 0;
+    int i_dec;
+
+    for (int i=0; i<num_pulses_in_block; i++)
+    {
+
+        std::string s = pulses_arr[i];
+        std::string delimiter = ",";
+
+        // Get block
+        vector <string> block_arr;
+
+        size_t pos = 0;
+        std::string token;
+        while ((pos = s.find(delimiter)) != std::string::npos) {
+            token = s.substr(0, pos);
+            block_arr.push_back(token);
+            s.erase(0, pos + delimiter.length());
+        }
+        block_arr.push_back(s);
+
+        int num_values_in_block = block_arr.size();
+
+        for (int i=0; i<num_values_in_block; i++)
+            cout << block_arr[i] << "\n";
+
+        cout << "num_values_in_block = " << num_values_in_block << endl;
+
+
+        i_dec = std::stoi (block_arr[1],&sz);
+        cout << "i_dec = " << i_dec << endl << endl;
+
+        tblock += i_dec;
+    }
+
+    cout << "tblock = " << tblock << endl;
+
+    // =======================================================
+
+    int num_rpts = num_pris / num_pulses_in_block;
+
+    cout << "num_pris =" << num_pris << "\nnum_rpts = " << num_rpts << endl;
+
+    int texperiment = tblock * num_rpts * 1e-6;  //  secs
+                                                // num_pris * pri * 1e-6;  // = 60000 * 1000/1000000 = 60
+
+    cout << "texperiment = " << texperiment << " secs" << endl;
+
+    return texperiment;
+}
+
+
+//=============================================================================
+// checkCountdown()
+// This method parses the start and end times for the video recording,
+// converts the times from dd-MM-yyyy hh:mm:ss to yyyy-MM-dd hh:mm:ss formats for timer and NTP
+// If countdown time is valid, this method starts the countdown timer
+//=============================================================================
+bool MainWindow::checkCountdown(void)
 {
     Datetime datetime;
     stringstream ss_unixtime;
     HeaderArmFiles headerarmfiles;
 
-    // read armtime from Header File values
-    QString year = headerarmfiles.readFromHeaderFile("Timing", "YEAR");
-    QString month = headerarmfiles.readFromHeaderFile("Timing", "MONTH");
-    QString day = headerarmfiles.readFromHeaderFile("Timing", "DAY");
-    QString hour = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
-    QString minute = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
-    QString second = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
-
-    // calculate ENDTIMESECS from Header File values
-    int num_pris = atoi(headerarmfiles.readFromHeaderFile("PulseParameters", "NUM_PRIS").toStdString().c_str());
-    int pri = atoi(headerarmfiles.readFromHeaderFile("PulseParameters", "PRI").toStdString().c_str());    // microseconds
-    EXPERIMENT_LENGTH = num_pris * pri * 1e-6;  // = 60000 * 1000/1000000 = 60
-
-    //required format: YYYY-MM-DD HH:MM:SS
-    ss_unixtime << year.toStdString() << "-" << month.toStdString() << "-" << day.toStdString() << " ";
-    ss_unixtime << hour.toStdString() << ":" << minute.toStdString() << ":" << second.toStdString();
-
-    //change times to Unix time format
-    strtUnixTime = datetime.convertToUnixTime(ss_unixtime.str());
-    stopUnixTime = strtUnixTime + EXPERIMENT_LENGTH;
-    currentUnixTime = time(NULL);
-
-    //check if the start/end times are in the past
-    if(strtUnixTime < currentUnixTime)
+    try
     {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future start time");
-    }
-    else if(stopUnixTime < strtUnixTime)
-    {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future stop time");
-    }
-    else // start countdown to armtime
-    {
-        starttimer->start((strtUnixTime - currentUnixTime)*1000);
-        experiment_state = WAITING;
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to armtime");
-        ui->countdownLabel->setText("Countdown to armtime");
-    }
+        // read armtime from Header File values
+        QString year = headerarmfiles.readFromHeaderFile("Timing", "YEAR");
+        QString month = headerarmfiles.readFromHeaderFile("Timing", "MONTH");
+        QString day = headerarmfiles.readFromHeaderFile("Timing", "DAY");
+        QString hour = headerarmfiles.readFromHeaderFile("Timing", "HOUR");
+        QString minute = headerarmfiles.readFromHeaderFile("Timing", "MINUTE");
+        QString second = headerarmfiles.readFromHeaderFile("Timing", "SECOND");
 
-    ui->statusBox->append("");
-    ui->statusBox->setTextColor("black");
+        cout << "checkCountdown1() = " << year.toStdString() << "-" << month.toStdString()<< "-" << day.toStdString();
+        cout << " " << hour.toStdString() << ":" << minute.toStdString() << ":" << second.toStdString() << endl;
+
+        // calculate EXPERIMENT_LENGTH from Header File values
+        EXPERIMENT_LENGTH = calcExperimentLength();
+
+        //required format: YYYY-MM-DD HH:MM:SS
+        ss_unixtime << year.toStdString() << "-" << setfill('0') << setw(2) << month.toStdString() << "-" << setfill('0') << setw(2) << day.toStdString() << " ";
+        ss_unixtime << hour.toStdString() << ":" << setfill('0') << setw(2) << minute.toStdString() << ":" << setfill('0') << setw(2) << second.toStdString();
+
+        cout << "checkCountdown2() = " << ss_unixtime.str() << endl;
+
+        struct tm tm1;
+        tm1 = datetime.convertToStructTm(ss_unixtime.str());
+
+        // Check for validity
+        int iyear, imonth, iday;
+
+        iyear = tm1.tm_year + 1900;
+        imonth = tm1.tm_mon + 1;
+        iday = tm1.tm_mday;
+
+        cout << "checkCountdown3() = " << iyear << "-" << imonth << "-" << iday << endl;
+
+        if (((imonth == 2) && (iday > 28) && (remainder (iyear, 4) != 0)) ||
+            ((imonth == 2) && (iday > 29) && (remainder (iyear, 4) == 0)) ||
+            (((imonth == 4) || (imonth == 6) || (imonth == 11))  && (iday > 30)))
+        {
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header File date is invalid, please correct it.");
+            return false;
+        }
+
+        strtUnixTime = datetime.convertToUnixTime(tm1);
+        stopUnixTime = strtUnixTime + EXPERIMENT_LENGTH;
+        currentUnixTime = time(NULL);
+
+        //check if the start/end times are in the past
+        if(strtUnixTime < currentUnixTime)
+        {
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future start time");
+            return false;
+        }
+        else if(stopUnixTime < strtUnixTime)
+        {
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Please use a future stop time");
+            return false;
+        }
+        else // return true
+        {
+            // start countdown to armtime
+            starttimer->start((strtUnixTime - currentUnixTime)*1000);
+            cout << "armtime = " << (strtUnixTime - currentUnixTime)*1000 << endl;
+            ui->countdownLabel->setText("Countdown to armtime");
+            experiment_state = WAITING;
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Countdown to armtime");
+
+            return true;
+
+        }
+    }
+    catch(exception &e)
+    {
+        cout << "checkCountdown exception: " << e.what() << endl;
+    }
 }
 
 
