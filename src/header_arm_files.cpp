@@ -5,6 +5,8 @@
 //Version       1.0 (December 2017)
 //Edited By:    Shirley Coetzee, Darryn Jordan and Simon Lewis
 //Revision:     2.0 (Jan 2018)
+//Edited By:    Shirley Coetzee
+//Revision      3.0 (Oct 2018)
 
 
 #include "header_arm_files.h"
@@ -94,37 +96,3 @@ string HeaderArmFiles::readFromGPSInfoFile(string var)
 
     return value;
 }
-
-
-//=============================================================================
-// readFromBearingsFile()
-//=============================================================================
-//method to return a variable's value from a Bearings file
-string HeaderArmFiles::readFromBearingsFile(string var, int offset, int strsize)
-{
-    string path, data;
-
-    path = NODE_BEARINGS_PATH;
-
-    //Read from header file
-    std::ifstream check (path);
-    if (check.good() != 1)
-    {
-        printf("Please check location of bearings file and try again.\n");
-        return "Fault";
-    }
-
-    std::string line;
-    while ( std::getline( check, line ) )
-    {
-        std::size_t found = line.find(var);
-        if (found!=std::string::npos)
-        {
-          data = line.substr(found+offset,strsize);
-          break;
-        }
-    }
-
-    return data;
-}
-

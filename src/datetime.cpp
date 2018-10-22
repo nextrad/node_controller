@@ -12,6 +12,7 @@ Datetime::Datetime(void)
 {
 
 }
+
 //=============================================================================
 
 string Datetime::getTimeAndDate(const char *format)
@@ -26,6 +27,7 @@ string Datetime::getTimeAndDate(const char *format)
     return dateTime;
 }
 //=============================================================================
+// This time rolls over if add seconds
 string Datetime::getNowPlusSecs(int secs)
 {
     QDateTime eTime = QDateTime::currentDateTime();
@@ -34,6 +36,7 @@ string Datetime::getNowPlusSecs(int secs)
     return now.c_str();
 }
 //=============================================================================
+// This time does not roll over if add seconds
 string Datetime::getNowSecsPlusSecs(int secs)
 {
     QDateTime eTime = QDateTime::currentDateTime();
@@ -41,6 +44,7 @@ string Datetime::getNowSecsPlusSecs(int secs)
     string now = t.toString("ss").toUtf8().constData();
     return now.c_str();
 }
+
 //=============================================================================
 //"yyyy-MM-dd hh:mm:ss"  Local time (SAST)
 string Datetime::getNowInYears(void)
@@ -89,7 +93,6 @@ string Datetime::getNowInSeconds(void)
     string now = eTime.toString("ss").toUtf8().constData();
     return now.c_str();
 }
-
 //=============================================================================
 // getCountDownTime()
 //=============================================================================
@@ -111,11 +114,13 @@ QString Datetime::getCountDownTime(time_t timeLeft)
     ss_countdown << std::setfill('0') << std::setw(2) << hours << ":" << std::setfill('0') << std::setw(2) << mins << ":" << std::setfill('0') << std::setw(2) << secs;
     return QString::fromStdString(ss_countdown.str());
 }
+
+
 //=============================================================================
-// convertToUnixTime()
+// convertToStructTm()
 //=============================================================================
-//Method to convert time to 'yyyy-MM-dd hh:mm:ss' format then to data type time_t
-time_t Datetime::convertToUnixTime(string timestamp)
+//Method to convert time to 'yyyy-MM-dd hh:mm:ss' format then to struct tm
+struct tm Datetime::convertToStructTm(string timestamp)
 {
     string str = timestamp;
     string s   = "";
@@ -133,11 +138,36 @@ time_t Datetime::convertToUnixTime(string timestamp)
     {
         s = str;
     }
+    else if ((str.substr(4,1) == "-") && (str.substr(6,1) == "-") && (str.substr(9,1) == " "))
+    {
+        s = str;
+    }
+    else if ((str.substr(4,1) == "-") && (str.substr(6,1) == "-") && (str.substr(8,1) == " "))
+    {
+        s = str;
+    }
+
+    cout << "convertToStructTm() = " << s << endl;
 
     // Convert the date from 'yyyy-MM-dd hh:mm:ss' format to get correct Unix time!
     struct tm tm;
-    strptime(s.c_str(), "%Y-%m-%d %H:%M:%S", &tm);
-    return mktime(&tm);
+    if (strptime(s.c_str(), "%Y-%m-%d %H:%M:%S", &tm) == NULL)
+    {
+        cout << "convertToStructTm() " << timestamp << "->" << s << " ERROR !!!! " << endl;
+    }
+
+    return tm;
+}
+
+
+
+//=============================================================================
+// convertToUnixTime()
+//=============================================================================
+//Method to convert struct tm format to data type time_t
+time_t Datetime::convertToUnixTime(struct tm tm1)
+{
+    return mktime(&tm1);
 }
 
 
