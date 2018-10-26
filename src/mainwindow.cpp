@@ -379,15 +379,15 @@ void MainWindow::on_calcBearingsButton_clicked()
     ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Reading Header File for target and node locations");
     ui->statusBox->append("");
 
-    if (experiment_state != INACTIVE)
-    {
+//    if (experiment_state != INACTIVE)
+//    {
         calcBearings(NODE_ID);
-    }
-    else
-    {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header File not recent");
-        ui->statusBox->append("");
-    }
+//    }
+//    else
+//    {
+//        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header File not recent");
+//        ui->statusBox->append("");
+//    }
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
@@ -445,15 +445,23 @@ void MainWindow::calcBearings(int node_num)
                         + "lat=" + tgtlat + "                    long=" + tgtlon);
             ui->statusBox->append("");
 
+            double err = 0.001;  // Error in Google Earth conversion between map and coordinates
+
+            // Round to 4 decimal points
             Point node, target;
-            node.lat = nodelat.toDouble();
-            node.lon = nodelon.toDouble();
-            target.lat = tgtlat.toDouble();
-            target.lon = tgtlon.toDouble();
+            node.lat = floor((nodelat.toDouble()*10000)+0.005)/10000.0 - err;
+            node.lon = floor((nodelon.toDouble()*10000)+0.005)/10000.0;
+            target.lat = floor((tgtlat.toDouble()*10000)+0.005)/10000.0;
+            target.lon = floor((tgtlon.toDouble()*10000)+0.005)/10000.0;
+
+            cout << "node = " << node.lat << ", " << node.lon << endl;
+            cout << "target = " << target.lat << ", " << target.lon << endl;
 
             brg = bearingTo(node, target);
 
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 4));        }
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 2));
+
+        }
 
         ui->statusBox->append("");
         ui->statusBox->setTextColor("black");
@@ -500,38 +508,18 @@ double MainWindow::toDegrees (double rads) {
 
 double MainWindow::bearingTo(Point here, Point there)
 {
-    // tanθ = sinΔλ⋅cosφ2 / cosφ1⋅sinφ2 − sinφ1⋅cosφ2⋅cosΔλ
-    // see mathforum.org/library/drmath/view/55417.html for derivation
-
     double ang1 = toRadians(here.lat);
     double ang2 = toRadians(there.lat);
     double londiff = toRadians(there.lon-here.lon);
+
     double y = sin(londiff) * cos(ang2);
     double x = cos(ang1)*sin(ang2) -
             sin(ang1)*cos(ang2)*cos(londiff);
+
     double brg = atan2(y, x);
+    double output = std::fmod((toDegrees(brg)+360), 360);
 
-    return std::fmod((toDegrees(brg)+360), 360);
-}
-
-
-//=======================================================================
-// Returns final bearing arriving at destination destination point from ‘this’ point; the final bearing
-// will differ from the initial bearing by varying degrees according to distance and latitude.
-//
-// @param   {LatLon} point - Latitude/longitude of destination point.
-// @returns {number} Final bearing in degrees from north.
-//
-// @example
-//     var p1 = new LatLon(52.205, 0.119);
-//     var p2 = new LatLon(48.857, 2.351);
-//     var b2 = p1.finalBearingTo(p2); // 157.9°
-//=======================================================================
-
-double MainWindow::finalBearingTo (Point here, Point there)
-{
-    // get initial bearing from destination point to this point & reverse it by adding 180°
-    return std::fmod(( bearingTo(here, there)+180 ), 360);
+    return output;
 }
 
 

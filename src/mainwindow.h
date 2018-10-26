@@ -68,8 +68,6 @@ private:
         public:
             double lat;
             double lon;
-
-        private:
     };
 
     HeaderArmFiles headerarmfiles;
@@ -99,7 +97,6 @@ private:
 
     double bearingTo(Point here, Point there);
 
-    double finalBearingTo (Point here, Point there);
 };
 
 #endif // MAINWINDOW_H
