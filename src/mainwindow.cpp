@@ -379,15 +379,7 @@ void MainWindow::on_calcBearingsButton_clicked()
     ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Reading Header File for target and node locations");
     ui->statusBox->append("");
 
-//    if (experiment_state != INACTIVE)
-//    {
-        calcBearings(NODE_ID);
-//    }
-//    else
-//    {
-//        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Header File not recent");
-//        ui->statusBox->append("");
-//    }
+    calcBearings(NODE_ID);
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
@@ -453,9 +445,6 @@ void MainWindow::calcBearings(int node_num)
             node.lon = floor((nodelon.toDouble()*10000)+0.005)/10000.0;
             target.lat = floor((tgtlat.toDouble()*10000)+0.005)/10000.0;
             target.lon = floor((tgtlon.toDouble()*10000)+0.005)/10000.0;
-
-            cout << "node = " << node.lat << ", " << node.lon << endl;
-            cout << "target = " << target.lat << ", " << target.lon << endl;
 
             brg = bearingTo(node, target);
 
