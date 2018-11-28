@@ -437,14 +437,16 @@ void MainWindow::calcBearings(int node_num)
                         + "lat=" + tgtlat + "                    long=" + tgtlon);
             ui->statusBox->append("");
 
-            double err = 0.001;  // Error in Google Earth conversion between map and coordinates
-
             // Round to 4 decimal points
             Point node, target;
-            node.lat = floor((nodelat.toDouble()*10000)+0.005)/10000.0 - err;
+            node.lat = floor((nodelat.toDouble()*10000)+0.005)/10000.0;
             node.lon = floor((nodelon.toDouble()*10000)+0.005)/10000.0;
             target.lat = floor((tgtlat.toDouble()*10000)+0.005)/10000.0;
             target.lon = floor((tgtlon.toDouble()*10000)+0.005)/10000.0;
+
+            std::cout << "node = " << node.lat << " " << node.lon << std::endl;
+            std::cout << "target = " << target.lat << " " << target.lon << std::endl;
+
 
             brg = bearingTo(node, target);
 
@@ -497,15 +499,28 @@ double MainWindow::toDegrees (double rads) {
 
 double MainWindow::bearingTo(Point here, Point there)
 {
-    double ang1 = toRadians(here.lat);
-    double ang2 = toRadians(there.lat);
-    double londiff = toRadians(there.lon-here.lon);
 
-    double y = sin(londiff) * cos(ang2);
-    double x = cos(ang1)*sin(ang2) -
-            sin(ang1)*cos(ang2)*cos(londiff);
+//    // www.igismap.com/formula-to-find-bearing ...
+//    here.lat = -34.1926; //39.099912;
+//    here.lon = 18.4458; //-94.581213;
 
-    double brg = atan2(y, x);
+//    there.lat = -34.1812; //38.627089;
+//    there.lon = 18.4601; //90.200203;
+
+    double ang1 = here.lat;
+    double ang2 = there.lat;
+    double londiff = there.lon-here.lon;
+    std::cout << " ang1 = " << ang1 << " ang2 = " << ang2 << " ldiff = " << londiff << std::endl;
+
+    double x = cos(toRadians(ang2)) * sin(toRadians(londiff));
+    std::cout << "X= " << x << std::endl;
+
+    double y = cos(toRadians(ang1))*sin(toRadians(ang2)) - sin(toRadians(ang1))*cos(toRadians(ang2))*cos(toRadians(londiff));
+    std::cout << " Y= " << y << std::endl;
+
+    double brg = atan2(x,y);
+    std::cout << "bearing = " << brg << " deg = " << toDegrees(brg) << std::endl;
+
     double output = std::fmod((toDegrees(brg)+360), 360);
 
     return output;
