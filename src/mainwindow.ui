@@ -137,7 +137,7 @@ Positions</string>
        </property>
        <property name="text">
         <string>Determine
-Bearings + Distance</string>
+Bearing + Distance</string>
        </property>
       </widget>
      </item>
