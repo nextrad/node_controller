@@ -373,13 +373,13 @@ void MainWindow::receiveNodePosition(int node_num)
 // Checks if received latest Header File
 // If so, calls calcBearings(NODE_ID);
 //=============================================================================
-void MainWindow::on_calcBearingsButton_clicked()
+void MainWindow::on_calcBearingDistanceButton_clicked()
 {
     ui->statusBox->append("");
     ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Reading Header File for target and node locations");
     ui->statusBox->append("");
 
-    calcBearings(NODE_ID);
+    calcBearingDistance(NODE_ID);
 
     ui->statusBox->append("");
     ui->statusBox->setTextColor("black");
@@ -387,18 +387,19 @@ void MainWindow::on_calcBearingsButton_clicked()
 }
 
 //=============================================================================
-// calcBearings()
-// Calculate bearing from node position and target position.
+// calcBearingDistance(int node_num)
+// Calculate bearing and distance from node position and target position.
 // e.g.
 // p1 = new LatLon(-34.19269, 18.44571);
 // p2 = new LatLon(-34.18126, 18.46009);
-// b2 = p1.bearingTo(p2); // 46.14°
+// b = p1.bearingTo(p1,p2); // 46.14°
+// d = p1.distance((p1,p2); // 2 km
 //
 //=============================================================================
-void MainWindow::calcBearings(int node_num)
+void MainWindow::calcBearingDistance(int node_num)
 {
-    QString nodelat, nodelon, tgtlat, tgtlon;
-    double brg;
+    QString nodelat, nodelon, nodeht, tgtlat, tgtlon, tgtht;
+    double brg, dist;
 
     try
     {
@@ -407,20 +408,25 @@ void MainWindow::calcBearings(int node_num)
         {
             case 0: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE0_LOCATION_LAT");
                     nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE0_LOCATION_LON");
+                    nodeht = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE0_LOCATION_HT");
                     break;
             case 1: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE1_LOCATION_LAT");
                     nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE1_LOCATION_LON");
+                    nodeht = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE1_LOCATION_HT");
                     break;
             case 2: nodelat = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE2_LOCATION_LAT");
                     nodelon = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE2_LOCATION_LON");
+                    nodeht = headerarmfiles.readFromHeaderFile("GeometrySettings", "NODE2_LOCATION_HT");
                     break;
         }
 
         // Get node position from Header file
         tgtlat = headerarmfiles.readFromHeaderFile("TargetSettings", "TGT_LOCATION_LAT");
         tgtlon = headerarmfiles.readFromHeaderFile("TargetSettings", "TGT_LOCATION_LON");
+        tgtht = headerarmfiles.readFromHeaderFile("TargetSettings", "TGT_LOCATION_HT");
 
-        if ((nodelat == "Fault") || (nodelon == "Fault") || (tgtlat == "Fault") || (tgtlon == "Fault"))
+
+        if ((nodelat == "Fault") || (nodelon == "Fault") || (nodeht == "Fault") || (tgtlat == "Fault") || (tgtlon == "Fault") || (tgtht == "Fault"))
         {
             // Display data on screen in red X per node
             ui->statusBox->setTextColor("red");
@@ -431,26 +437,29 @@ void MainWindow::calcBearings(int node_num)
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + nodelat + "                    long=" + nodelon);
+                        + "lat=" + nodelat + "                    long=" + nodelon + "\n" "ht=" + nodeht);
             ui->statusBox->append("");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "target" + "\n" \
-                        + "lat=" + tgtlat + "                    long=" + tgtlon);
+                        + "lat=" + tgtlat + "                    long=" + tgtlon + "\n" "ht=" + tgtht);
             ui->statusBox->append("");
 
             // Round to 4 decimal points
             Point node, target;
             node.lat = floor((nodelat.toDouble()*10000)+0.005)/10000.0;
             node.lon = floor((nodelon.toDouble()*10000)+0.005)/10000.0;
+            node.ht = floor((nodeht.toDouble()*10000)+0.005)/10000.0;
             target.lat = floor((tgtlat.toDouble()*10000)+0.005)/10000.0;
             target.lon = floor((tgtlon.toDouble()*10000)+0.005)/10000.0;
+            target.ht = floor((tgtht.toDouble()*10000)+0.005)/10000.0;
 
-            std::cout << "node = " << node.lat << " " << node.lon << std::endl;
-            std::cout << "target = " << target.lat << " " << target.lon << std::endl;
-
+            std::cout << "node = " << node.lat << " " << node.lon << " " << node.ht << std::endl;
+            std::cout << "target = " << target.lat << " " << target.lon << " " << target.ht << std::endl;
 
             brg = bearingTo(node, target);
+            dist = calcDistance(node, target);
 
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 2));
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 2) + "\
+                                    \ndistance= " + QString::number(dist, 'f',2));
 
         }
 
@@ -460,28 +469,23 @@ void MainWindow::calcBearings(int node_num)
     }
     catch(exception &e)
     {
-        cout << "calcBearings exception: " << e.what() << endl;
+        cout << "calcBearingDistance exception: " << e.what() << endl;
     }
 }
-
 
 //=======================================================================
 // Returns the radians from the input measured in degrees.
 //=======================================================================
-
 double MainWindow::toRadians (double degs) {
         return degs * M_PI / 180;
 }
 
-
 //=======================================================================
 // Returns the degrees from the input measured in radians.
 //=======================================================================
-
 double MainWindow::toDegrees (double rads) {
     return rads * 180 / M_PI;
 }
-
 
 //=======================================================================
 //
@@ -496,8 +500,7 @@ double MainWindow::toDegrees (double rads) {
 //     var b1 = p1.bearingTo(p2); // 156.2°
 //
 //=======================================================================
-
-double MainWindow::bearingTo(Point here, Point there)
+double MainWindow::bearingTo(Point node, Point target)
 {
 
 //    // www.igismap.com/formula-to-find-bearing ...
@@ -507,25 +510,44 @@ double MainWindow::bearingTo(Point here, Point there)
 //    there.lat = -34.1812; //38.627089;
 //    there.lon = 18.4601; //90.200203;
 
-    double ang1 = here.lat;
-    double ang2 = there.lat;
-    double londiff = there.lon-here.lon;
-    std::cout << " ang1 = " << ang1 << " ang2 = " << ang2 << " ldiff = " << londiff << std::endl;
+    double ang1 = node.lat;
+    double ang2 = target.lat;
+    double londiff = target.lon-node.lon;
+//    std::cout << " ang1 = " << ang1 << " ang2 = " << ang2 << " ldiff = " << londiff << std::endl;
 
     double x = cos(toRadians(ang2)) * sin(toRadians(londiff));
-    std::cout << "X= " << x << std::endl;
+//    std::cout << "X= " << x << std::endl;
 
     double y = cos(toRadians(ang1))*sin(toRadians(ang2)) - sin(toRadians(ang1))*cos(toRadians(ang2))*cos(toRadians(londiff));
-    std::cout << " Y= " << y << std::endl;
+//    std::cout << " Y= " << y << std::endl;
 
     double brg = atan2(x,y);
-    std::cout << "bearing = " << brg << " deg = " << toDegrees(brg) << std::endl;
+//    std::cout << "bearing = " << brg << " deg = " << toDegrees(brg) << std::endl;
 
     double output = std::fmod((toDegrees(brg)+360), 360);
 
     return output;
 }
 
+
+//=============================================================================
+// calcDistance(int node_num)
+// Calculate distance from node position and target position.
+//=============================================================================
+double MainWindow::calcDistance(Point node, Point target)
+{
+    double x_1 = node.ht * cos(toRadians(node.lat)) * sin(toRadians(node.lon));
+    double y_1 = node.ht * sin(toRadians(node.lat));
+    double z_1 = node.ht * cos(toRadians(node.lat)) * cos(toRadians(node.lon));
+
+    double x_2 = target.ht * cos(toRadians(target.lat)) * sin(toRadians(target.lon));
+    double y_2 = target.ht * sin(toRadians(target.lat));
+    double z_2 = target.ht * cos(toRadians(target.lat)) * cos(toRadians(target.lon));
+
+    double dist = sqrt(pow((x_2-x_1),2.0) + pow((y_2-y_1),2.0) + pow((z_2-z_1),2.0));
+    return dist;
+
+}
 
 //=======================================================================
 // showVideoButtonClicked()
