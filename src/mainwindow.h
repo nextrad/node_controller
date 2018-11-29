@@ -28,7 +28,7 @@ private slots:
 
     void on_receiveNodePositionsButton_clicked();
 
-    void on_calcBearingsButton_clicked();
+    void on_calcBearingDistanceButton_clicked();
 
     void on_showVideoButton_clicked();
 
@@ -68,6 +68,7 @@ private:
         public:
             double lat;
             double lon;
+            double ht;
     };
 
     HeaderArmFiles headerarmfiles;
@@ -82,7 +83,15 @@ private:
 
     void receiveNodePosition(int node_num);
 
-    void calcBearings(int node_num);
+
+    void calcBearingDistance(int node_num);
+
+    double toRadians (double degs);
+    double toDegrees (double rads);
+    double bearingTo(Point node, Point target);
+
+    double calcDistance(Point node, Point target);
+
 
     QString getCountDownTime(time_t timeLeft);
 
@@ -91,11 +100,7 @@ private:
     int calcExperimentLength(void);
     bool checkCountdown(void);
 
-    double toRadians (double degs);
 
-    double toDegrees (double rads);
-
-    double bearingTo(Point here, Point there);
 
 };
 
