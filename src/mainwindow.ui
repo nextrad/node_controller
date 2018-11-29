@@ -56,9 +56,9 @@
    <widget class="QTextEdit" name="statusBox">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>160</x>
       <y>80</y>
-      <width>331</width>
+      <width>321</width>
       <height>421</height>
      </rect>
     </property>
@@ -125,7 +125,7 @@ Positions</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="calcBearingsButton">
+      <widget class="QPushButton" name="calcBearingDistanceButton">
        <property name="enabled">
         <bool>true</bool>
        </property>
