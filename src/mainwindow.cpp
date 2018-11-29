@@ -354,7 +354,7 @@ void MainWindow::receiveNodePosition(int node_num)
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + QString::fromStdString(lat) + "                    long=" + QString::fromStdString(lon) + "\n" \
+                        + "lat=" + QString::fromStdString(lat) + "                    lon=" + QString::fromStdString(lon) + "\n" \
                         + "ht=" + QString::fromStdString(ht));
         }
 
@@ -390,11 +390,6 @@ void MainWindow::on_calcBearingDistanceButton_clicked()
 //=============================================================================
 // calcBearingDistance(int node_num)
 // Calculate bearing and distance from node position and target position.
-// e.g.
-// p1 = new LatLon(-34.19269, 18.44571);
-// p2 = new LatLon(-34.18126, 18.46009);
-// b = p1.bearingTo(p1,p2); // 46.14°
-// d = p1.distance((p1,p2); // 2 km
 //
 //=============================================================================
 void MainWindow::calcBearingDistance(int node_num)
@@ -438,10 +433,10 @@ void MainWindow::calcBearingDistance(int node_num)
             // Display data on screen in green values per node
             ui->statusBox->setTextColor("green");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "node" + QString::number(node_num) + "\n" \
-                        + "lat=" + nodelat + "                    long=" + nodelon + "\n" "ht=" + nodeht);
+                        + "lat=" + nodelat + "                    lon=" + nodelon + "\n" "ht=" + nodeht);
             ui->statusBox->append("");
             ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") + "target" + "\n" \
-                        + "lat=" + tgtlat + "                    long=" + tgtlon + "\n" "ht=" + tgtht);
+                        + "lat=" + tgtlat + "                    lon=" + tgtlon + "\n" "ht=" + tgtht);
             ui->statusBox->append("");
 
             // Round to 4 decimal points
@@ -459,9 +454,9 @@ void MainWindow::calcBearingDistance(int node_num)
             brg = bearingTo(node, target);
             dist = calcDistance(node, target);
 
-            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     \n") + "bearing=" + QString::number(brg, 'f', 2) + "\
-                                    \ndistance= " + QString::number(dist, 'f',2));
-
+            ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm      _     ") \
+                + "bearing=" + QString::number(brg, 'f', 2) + " deg\n" \
+                + "range=" + QString::number(dist, 'f', 2) + " m");
         }
 
         ui->statusBox->append("");
@@ -490,43 +485,27 @@ double MainWindow::toDegrees (double rads) {
 
 //=======================================================================
 //
-// Returns the (initial) bearing from ‘this’ point to destination point.
-//
-// @param   {LatLon} point - Latitude/longitude of destination point.
-// @returns {number} Initial bearing in degrees from north.
-//
-// @example
-//     var p1 = new LatLon(52.205, 0.119);
-//     var p2 = new LatLon(48.857, 2.351);
-//     var b1 = p1.bearingTo(p2); // 156.2°
+// Returns the (initial) bearing from node point to target point.
+// Adapted from www.igismap.com/formula-to-find-bearing ...
 //
 //=======================================================================
 double MainWindow::bearingTo(Point node, Point target)
 {
+//    node.lat = -34.1926; //39.099912;
+//    node.lon = 18.4458; //-94.581213;
 
-//    // www.igismap.com/formula-to-find-bearing ...
-//    here.lat = -34.1926; //39.099912;
-//    here.lon = 18.4458; //-94.581213;
-
-//    there.lat = -34.1812; //38.627089;
-//    there.lon = 18.4601; //90.200203;
+//    target.lat = -34.1812; //38.627089;
+//    target.lon = 18.4601; //90.200203;
 
     double ang1 = node.lat;
     double ang2 = target.lat;
     double londiff = target.lon-node.lon;
-//    std::cout << " ang1 = " << ang1 << " ang2 = " << ang2 << " ldiff = " << londiff << std::endl;
 
     double x = cos(toRadians(ang2)) * sin(toRadians(londiff));
-//    std::cout << "X= " << x << std::endl;
-
     double y = cos(toRadians(ang1))*sin(toRadians(ang2)) - sin(toRadians(ang1))*cos(toRadians(ang2))*cos(toRadians(londiff));
-//    std::cout << " Y= " << y << std::endl;
 
     double brg = atan2(x,y);
-//    std::cout << "bearing = " << brg << " deg = " << toDegrees(brg) << std::endl;
-
     double output = std::fmod((toDegrees(brg)+360), 360);
-
     return output;
 }
 
@@ -534,20 +513,26 @@ double MainWindow::bearingTo(Point node, Point target)
 //=============================================================================
 // calcDistance(int node_num)
 // Calculate distance from node position and target position.
+//
+// This uses the ‘haversine’ formula to calculate the great-circle distance between two points,
+// that is, the shortest distance over the earth’s surface,
+// giving an ‘as-the-crow-flies’ distance between the points (ignoring any hills they fly over, of course!).
+//
 //=============================================================================
 double MainWindow::calcDistance(Point node, Point target)
 {
-    double x_1 = node.ht * cos(toRadians(node.lat)) * sin(toRadians(node.lon));
-    double y_1 = node.ht * sin(toRadians(node.lat));
-    double z_1 = node.ht * cos(toRadians(node.lat)) * cos(toRadians(node.lon));
+    double R = 6371e3; // Earth's radius in metres
+    double ang1 = toRadians(node.lat);
+    double ang2 = toRadians(target.lat);
+    double latdiff = toRadians(target.lat-node.lat);
+    double londiff = toRadians(target.lon-node.lon);
 
-    double x_2 = target.ht * cos(toRadians(target.lat)) * sin(toRadians(target.lon));
-    double y_2 = target.ht * sin(toRadians(target.lat));
-    double z_2 = target.ht * cos(toRadians(target.lat)) * cos(toRadians(target.lon));
+    double a = sin (latdiff/2) * sin(latdiff/2) + cos(ang1) * cos(ang2) * sin(londiff/2) * sin(londiff/2);
+    double c =  2 * atan2( sqrt(a),sqrt(1-a) );
+    double dist = R * c;
 
-    double dist = sqrt(pow((x_2-x_1),2.0) + pow((y_2-y_1),2.0) + pow((z_2-z_1),2.0));
+    std::cout << "dist= " << dist << std::endl;
     return dist;
-
 }
 
 //=======================================================================
