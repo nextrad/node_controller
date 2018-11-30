@@ -65,8 +65,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     if (!NTP_ON)
     {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP for correct datetime");
-        ui->statusBox->append(QDateTime::currentDateTime().toString(""));
+        ui->statusBox->append("");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP server for correct datetime");
+        ui->statusBox->append("");
     }
 
     //start vlc telnet server, connect and configure
@@ -552,8 +553,9 @@ void MainWindow::on_showVideoButton_clicked()
 {
     if (!NTP_ON)
     {
-        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP for correct datetime");
-        ui->statusBox->append(QDateTime::currentDateTime().toString(""));
+        ui->statusBox->append("");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP server for correct datetime");
+        ui->statusBox->append("");
     }
 
     stringstream ss;
