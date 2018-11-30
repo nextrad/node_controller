@@ -35,8 +35,12 @@ QString dayold, hourold, minuteold, secondold;
 
 extern int NODE_ID;
 extern int EXPERIMENT_LENGTH; //in seconds
+extern bool NTP_ON;
 extern string RTSP_HOST;
-extern string OVERLAY_IMAGE;
+extern string OVERLAY_IMAGE1;
+extern string OVERLAY_IMAGE2;
+extern string OVERLAY_IMAGE3;
+extern string OVERLAY_IMAGE4;
 extern string OUTPUT_DIRECTORY;
 
 
@@ -58,6 +62,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->label->setText(stringToCharPntr(ss.str()));
 
     ui->Countdown->display("00:00:00");
+
+    if (!NTP_ON)
+    {
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP for correct datetime");
+        ui->statusBox->append(QDateTime::currentDateTime().toString(""));
+    }
 
     //start vlc telnet server, connect and configure
     int status = system("x-terminal-emulator -e \"vlc -I telnet\n\"");
@@ -540,9 +550,15 @@ double MainWindow::calcDistance(Point node, Point target)
 //=======================================================================
 void MainWindow::on_showVideoButton_clicked()
 {
+    if (!NTP_ON)
+    {
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Connect NTP for correct datetime");
+        ui->statusBox->append(QDateTime::currentDateTime().toString(""));
+    }
+
     stringstream ss;
     ss << "x-terminal-emulator -x -e \"cvlc --sub-filter logo --logo-file ";
-    ss << OVERLAY_IMAGE;
+    ss << OVERLAY_IMAGE1;
     ss << " --width=500 rtsp://";
     ss << RTSP_HOST;
     ss << "/live/video/profile1\"";
@@ -552,7 +568,6 @@ void MainWindow::on_showVideoButton_clicked()
         cout << "Failed to show video." << endl;
     }
 }
-
 
 //=======================================================================
 // abortVideoRecordingButtonClicked()

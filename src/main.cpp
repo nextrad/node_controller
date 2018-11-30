@@ -17,11 +17,16 @@
 #include "parameters.h"
 #include "video_connection_manager.h"
 
+bool NTP_ON;
 int NODE_ID;
 int EXPERIMENT_LENGTH;
 string RTSP_HOST;
 string OUTPUT_DIRECTORY;
-string OVERLAY_IMAGE;
+string OVERLAY_IMAGE1;
+string OVERLAY_IMAGE2;
+string OVERLAY_IMAGE3;
+string OVERLAY_IMAGE4;
+
 
 
 void testNTP(void);
@@ -30,7 +35,7 @@ void setParameters(void);
 
 int main(int argc, char **argv)
 {
-  //  testNTP();
+    testNTP();
     setParameters();
 
     QApplication app (argc, argv);
@@ -45,6 +50,8 @@ int main(int argc, char **argv)
 
 void testNTP(void)
 {
+    NTP_ON = false;
+
     int status = system("sudo service ntp status > ntpStatus.txt"); //write the status of the NTP server to ntpStatus.txt
     if (0 != status)
     {
@@ -68,6 +75,10 @@ void testNTP(void)
         }
         printf("\n");
     }
+    else
+    {
+        NTP_ON = true;
+    }
     printf("\n");
 }
 
@@ -82,9 +93,12 @@ void setParameters(void)
         cin >> nodeNo;
         cout << endl;
 
-        OVERLAY_IMAGE = "/home/nextrad/Documents/Video/overlay_images/crosshair_1080p.png";
-        OUTPUT_DIRECTORY = "/home/nextrad/Documents/Video/output/";
-        EXPERIMENT_LENGTH = 60;  //default value [seconds]
+        OVERLAY_IMAGE1 = "/home/nextrad/Documents/node_controller/media/images/crosshair_1080p.png";
+        OVERLAY_IMAGE2 = "/home/nextrad/Documents/node_controller/media/images/crosshair_720p.png";
+        OVERLAY_IMAGE3 = "/home/nextrad/Documents/node_controller/media/images/crosshair_480p.png";
+        OVERLAY_IMAGE4 = "/home/nextrad/Documents/node_controller/media/images/CameraOverlayNode1_240p.png";
+        OUTPUT_DIRECTORY = "/home/nextrad/Documents/node_controller/output/";
+        EXPERIMENT_LENGTH = 40;  //default value [seconds]
 
 
         switch (nodeNo)

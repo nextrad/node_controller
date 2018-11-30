@@ -39,6 +39,6 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 #define ICON_PATH                   "../media/icons/favicon2.ico"
 #define TONES_PATH                  "../media/tones/"
 
-#define STARTTIMESECS               40
+#define STARTTIMESECS               60
 
 #endif // PARAMETERS_H
