@@ -9,6 +9,11 @@
 
 extern string OUTPUT_DIRECTORY;
 extern string RTSP_HOST;
+extern string OVERLAY_IMAGE1;
+extern string OVERLAY_IMAGE2;
+extern string OVERLAY_IMAGE3;
+extern string OVERLAY_IMAGE4;
+
 
 
 VideoConnectionManager::VideoConnectionManager(void)  : socket(service)
@@ -21,32 +26,33 @@ VideoConnectionManager::VideoConnectionManager(void)  : socket(service)
     {
         case 1080:
         {
-            cameraOverlayConfig = "sfilter=logo{file='/home/nextrad/Documents/Video/overlay_images/crosshair_1080p.png'},";
+            cameraOverlayConfig = "sfilter=logo{file=" + OVERLAY_IMAGE1 + "},";
             cameraProfile = "profile1";
             break;
         }
 
         case 720:
         {
-            cameraOverlayConfig = "sfilter=logo{file='/home/nextrad/Documents/Video/overlay_images/crosshair_720p.png'},";
+            cameraOverlayConfig = "sfilter=logo{file=" + OVERLAY_IMAGE2 + "},";
             cameraProfile = "profile2";
             break;
         }
 
         case 480:
         {
-            cameraOverlayConfig = "sfilter=logo{file='/home/nextrad/Documents/Video/overlay_images/crosshair_480p.png'},";
+            cameraOverlayConfig = "sfilter=logo{file=" + OVERLAY_IMAGE3 + "},";
             cameraProfile = "profile3";
             break;
         }
 
         case 240:
         {
-            cameraOverlayConfig = "sfilter=logo{file='/home/nextrad/Documents/Video/overlay_images/CameraOverlayNode1_240p.png'},";
+            cameraOverlayConfig = "sfilter=logo{file=" + OVERLAY_IMAGE4 + "},";
             cameraProfile = "profile3";
             break;
         }
     }
+
 
     ipCameraAddress = (string)"rtsp://" + (string)RTSP_HOST + (string)":" + (string)RTSP_PORT + (string)"/live/video/" + cameraProfile;
 }
