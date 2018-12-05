@@ -26,8 +26,6 @@ public:
 private slots:
     void on_testConnectionButton_clicked();
 
-    void on_editHeaderFileButton_clicked();
-
     void on_receiveNodePositionsButton_clicked();
 
     void on_calcBearingDistanceButton_clicked();

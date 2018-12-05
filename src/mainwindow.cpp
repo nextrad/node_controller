@@ -307,24 +307,6 @@ char* MainWindow::stringToCharPntr(string str)
 }
 
 //=============================================================================
-// on_editHeaderFileButton_clicked()
-// Method to edit the Header File
-//=============================================================================
-
-void MainWindow::on_editHeaderFileButton_clicked()
-{
-    stringstream ss;
-    ss << "sudo gedit ";
-    ss << HEADER_PATH;
-
-    int status = system(stringToCharPntr(ss.str()));
-    if (-1 != status)
-    {
-        cout << "Failed to show Header File." << endl;
-    }
-}
-
-//=============================================================================
 // on_receiveNodePositionsButton_clicked()
 // Method to receive the node's positions from the GPSDO.
 //=============================================================================
