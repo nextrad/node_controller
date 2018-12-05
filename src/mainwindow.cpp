@@ -268,7 +268,7 @@ void MainWindow::testSubNetwork(QString NetID)
 
 //=============================================================================
 // testConnection()
-// pings an address to see if it's connected to the network.
+// Pings an address to see if it's connected to the network.
 //=============================================================================
 bool MainWindow::testConnection(string address)
 {
@@ -307,8 +307,26 @@ char* MainWindow::stringToCharPntr(string str)
 }
 
 //=============================================================================
-// receiveNodePositionsButtonClicked()
-// method to receive the node's positions from the GPSDO.
+// on_editHeaderFileButton_clicked()
+// Method to edit the Header File
+//=============================================================================
+
+void MainWindow::on_editHeaderFileButton_clicked()
+{
+    stringstream ss;
+    ss << "sudo gedit ";
+    ss << HEADER_PATH;
+
+    int status = system(stringToCharPntr(ss.str()));
+    if (-1 != status)
+    {
+        cout << "Failed to show Header File." << endl;
+    }
+}
+
+//=============================================================================
+// on_receiveNodePositionsButton_clicked()
+// Method to receive the node's positions from the GPSDO.
 //=============================================================================
 void MainWindow::on_receiveNodePositionsButton_clicked()
 {
@@ -547,7 +565,7 @@ double MainWindow::calcDistance(Point node, Point target)
 }
 
 //=======================================================================
-// showVideoButtonClicked()
+// on_showVideoButton_clicked()
 //=======================================================================
 void MainWindow::on_showVideoButton_clicked()
 {
@@ -572,7 +590,7 @@ void MainWindow::on_showVideoButton_clicked()
 }
 
 //=======================================================================
-// abortVideoRecordingButtonClicked()
+// on_abortVideoRecButton_clicked()
 //=======================================================================
 void MainWindow::on_abortVideoRecButton_clicked()
 {
@@ -678,8 +696,8 @@ void MainWindow::updateCountDownLCDAndPollHeaderFile(void)
 
 //=======================================================================
 // getCountDownTime()
-//=======================================================================
 //Calculates the hours minutes and seconds remaining for countdown
+//=======================================================================
 QString MainWindow::getCountDownTime(time_t timeLeft)
 {
     Datetime datetime;
@@ -702,6 +720,9 @@ void Window::startPedControlButtonClicked(void)
     system(stringToCharPntr(ss.str()));
 }
 */
+
+//=======================================================================
+// replaceCharsinStr()
 //=======================================================================
 string MainWindow::replaceCharsinStr(string str_in, char ch_in, char ch_out)
 {
