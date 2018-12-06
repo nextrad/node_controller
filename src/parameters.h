@@ -22,7 +22,7 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 
 #define RTSP_PORT                   "88"
 
-#define CAMERA_RESOLUTION           480
+#define CAMERA_RESOLUTION           1080
 
 #define IS_MOSAIC_MODE              true
 #define H_FILE_LENGTH               112

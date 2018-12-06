@@ -42,6 +42,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    string nodenumstr;
     int m_counter;
     int experiment_state;
 

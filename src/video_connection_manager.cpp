@@ -129,13 +129,14 @@ void VideoConnectionManager::configureVideoStream(void)
 {
     printf("Configuring RTSP stream...\n");
 
-    setRecFilePath(OUTPUT_DIRECTORY, getTimeAndDate("%d_%m_%y_%I:%M:%S"));
+    setRecFilePath(OUTPUT_DIRECTORY, getTimeAndDate("%Y_%m_%d_%H_%M_%S"));
 
     writeToSocket("del stream", PUBLIC);        //delete any previous instances of 'stream' if they exist
     writeToSocket("new stream broadcast enabled", PUBLIC); //create a new instance of 'stream' and enable it
     writeToSocket("setup stream input " + ipCameraAddress, PUBLIC); //set stream input
     writeToSocket("setup stream output #transcode{" + cameraOverlayConfig + "vcodec=h264,acodec=none}:std{access=file,mux=mp4,dst=" + getRecFilePath() + ".mp4}", PUBLIC); //setup the output type, encoding format and filename
     printf("-----------------------------\n");
+
 }
 
 

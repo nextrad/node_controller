@@ -57,9 +57,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
-    stringstream ss;
-    ss << "Node " << (int)NODE_ID;
-    ui->label->setText(stringToCharPntr(ss.str()));
+    // Save and display node number string
+    stringstream ss, ss1;
+    ss << "n" << (int)NODE_ID;
+    nodenumstr = ss.str();
+
+    ss1 << "Node " << (int)NODE_ID;
+    ui->label->setText(stringToCharPntr(ss1.str()));
 
     ui->Countdown->display("00:00:00");
 
@@ -548,6 +552,12 @@ double MainWindow::calcDistance(Point node, Point target)
 
 //=======================================================================
 // on_showVideoButton_clicked()
+//
+// To set up camera, goto http://192.168.1.14(or 24 or 34 respectively):88
+// Enter username: admin, password: admin
+// To set datetime: goto Config > network > SNTP and press sync to sync to the NTP.
+// Change Node to 1920 x 1080 resolution and CnC to 352 x 240 resolution
+//
 //=======================================================================
 void MainWindow::on_showVideoButton_clicked()
 {
@@ -569,6 +579,7 @@ void MainWindow::on_showVideoButton_clicked()
     {
         cout << "Failed to show video." << endl;
     }
+
 }
 
 //=======================================================================
@@ -692,7 +703,7 @@ QString MainWindow::getCountDownTime(time_t timeLeft)
 //=======================================================================
 /*
 // This method opens the pedestal controller program.
-// TODO At the moment this program hangs when the pedestal controller opens.
+// VI: At the moment this program hangs when the pedestal controller opens.
 // This is because they are open on the same thread. Multithreading or forking is needed to fix this.
 
 void Window::startPedControlButtonClicked(void)
@@ -846,6 +857,9 @@ bool MainWindow::checkCountdown(void)
         ss_unixtime << year.toStdString() << "-" << setfill('0') << setw(2) << month.toStdString() << "-" << setfill('0') << setw(2) << day.toStdString() << " ";
         ss_unixtime << hour.toStdString() << ":" << setfill('0') << setw(2) << minute.toStdString() << ":" << setfill('0') << setw(2) << second.toStdString();
 
+        // Save startTime
+        startTime = ss_unixtime.str();
+
         cout << "checkCountdown2() = " << ss_unixtime.str() << endl;
 
         struct tm tm1;
@@ -938,11 +952,13 @@ void MainWindow::stopRecording(void)
 
     string oldRecFileName = videoRecorder.getRecFilePath();
 
-    string newRecFileName = startTime;
+    string newRecFileName = startTime + "_" + nodenumstr;
+
     newRecFileName = replaceCharsinStr(newRecFileName, '-', '_');
     newRecFileName = replaceCharsinStr(newRecFileName, ' ', '_');
+    newRecFileName = replaceCharsinStr(newRecFileName, ':', '_');
 
-    if (startTime != "")
+     if (startTime != "")
     {
         string command;
         command = "mv " + oldRecFileName + ".mp4 " + OUTPUT_DIRECTORY + newRecFileName + ".mp4";
