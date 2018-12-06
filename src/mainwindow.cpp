@@ -557,7 +557,7 @@ double MainWindow::calcDistance(Point node, Point target)
 // Enter username: admin, password: admin
 // To set datetime: goto Config > network > SNTP and press sync to sync to the NTP.
 // Change Node to 1920 x 1080 resolution and CnC to 352 x 240 resolution
-//
+// Do not put a logo or name on overlay or on camera image as it may hide target
 //=======================================================================
 void MainWindow::on_showVideoButton_clicked()
 {
