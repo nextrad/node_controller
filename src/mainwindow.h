@@ -101,8 +101,6 @@ private:
     int calcExperimentLength(void);
     bool checkCountdown(void);
 
-
-
 };
 
 #endif // MAINWINDOW_H

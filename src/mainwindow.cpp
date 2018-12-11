@@ -141,6 +141,7 @@ void MainWindow::on_testConnectionButton_clicked()
 
     ui->statusBox->setTextColor("black");
     ui->countdownLabel->setText("");
+
 }
 
 //=============================================================================
@@ -546,7 +547,7 @@ double MainWindow::calcDistance(Point node, Point target)
     double c =  2 * atan2( sqrt(a),sqrt(1-a) );
     double dist = R * c;
 
-    std::cout << "dist= " << dist << std::endl;
+    std::cout << "dist = " << dist << std::endl;
     return dist;
 }
 
@@ -938,33 +939,44 @@ void MainWindow::startRecording(void)
 //=======================================================================
 void MainWindow::stopRecording(void)
 {
-    stringstream ss;
-
-    ss << "Saving video recording ";
-
-    videoRecorder.stopRecording();
-    experiment_state = INACTIVE;
-    ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording stopped");
-    ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + ss.str().c_str());
-    ui->countdownLabel->setText("Video recording stopped");
-
-    // Rename video recording filename to startTime
-
-    string oldRecFileName = videoRecorder.getRecFilePath();
-
-    string newRecFileName = startTime + "_" + nodenumstr;
-
-    newRecFileName = replaceCharsinStr(newRecFileName, '-', '_');
-    newRecFileName = replaceCharsinStr(newRecFileName, ' ', '_');
-    newRecFileName = replaceCharsinStr(newRecFileName, ':', '_');
-
-     if (startTime != "")
+    try
     {
-        string command;
-        command = "mv " + oldRecFileName + ".mp4 " + OUTPUT_DIRECTORY + newRecFileName + ".mp4";
-        int status = system(command.c_str());
-        cout << "Renamed video file to: " << newRecFileName << ".mp4, status = " << status << endl;
+        stringstream ss;
+
+        ss << "Saving video recording ";
+
+        videoRecorder.stopRecording();
+        experiment_state = INACTIVE;
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + "Video recording stopped");
+        ui->statusBox->append(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm   ") + ss.str().c_str());
+        ui->countdownLabel->setText("Video recording stopped");
+
+        string oldRecFileName = videoRecorder.getRecFilePath();
+        cout << "oldRecFileName = "  << oldRecFileName << endl;
+
+        // Rename video recording filename to startTime
+
+        string newRecFileName = startTime + "_" + nodenumstr;
+
+        newRecFileName = replaceCharsinStr(newRecFileName, '-', '_');
+        newRecFileName = replaceCharsinStr(newRecFileName, ' ', '_');
+        newRecFileName = replaceCharsinStr(newRecFileName, ':', '_');
+
+        if (startTime != "")
+        {
+            string command;
+            command = "mv " + oldRecFileName + ".mp4 " + OUTPUT_DIRECTORY + newRecFileName + ".mp4";
+            int status = system(command.c_str());
+            string statusstr = (status == 0)?"true":"false";
+            cout << "Renamed video file to: " << newRecFileName << ".mp4, status = " << statusstr << endl;
+        }
+        else
+        {
+            cout << "Did NOT rename video file " << oldRecFileName << endl;
+        }
+    }
+    catch(exception &e)
+    {
+        cout << "stopRecording exception: " << e.what() << endl;
     }
 }
-
-
