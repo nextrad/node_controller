@@ -22,7 +22,7 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 
 #define RTSP_PORT                   "88"
 
-#define CAMERA_RESOLUTION           480
+#define CAMERA_RESOLUTION           1080
 
 #define IS_MOSAIC_MODE              true
 #define H_FILE_LENGTH               112
@@ -36,15 +36,9 @@ enum WritePrivacy {PUBLIC, PRIVATE};
 #define CNC_NODE2_GPS_INFO_PATH     "/home/nextrad/Documents/cnc_controller/node2/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
 #define NODE_GPS_INFO_PATH          "/home/nextrad/Desktop/NextGPSDO/gps_info.ini"
 
-#define BEARINGS_FILE               "tardat2cc.rtf"
-#define CNC_NODE0_BEARINGS_PATH     "/home/nextrad/Documents/cnc_controller/node0/home/nextrad/Desktop/NextGPSDO/tardat2cc.rtf"
-#define CNC_NODE1_BEARINGS_PATH     "/home/nextrad/Documents/cnc_controller/node1/home/nextrad/Desktop/NextGPSDO/tardat2cc.rtf"
-#define CNC_NODE2_BEARINGS_PATH     "/home/nextrad/Documents/cnc_controller/node2/home/nextrad/Desktop/NextGPSDO/tardat2cc.rtf"
-#define NODE_BEARINGS_PATH          "/home/nextrad/tardat2cc.rtf"
-
 #define ICON_PATH                   "../media/icons/favicon2.ico"
 #define TONES_PATH                  "../media/tones/"
 
-#define STARTTIMESECS               40
+#define STARTTIMESECS               60
 
 #endif // PARAMETERS_H

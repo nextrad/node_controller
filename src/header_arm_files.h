@@ -20,7 +20,6 @@ class HeaderArmFiles
         void writeToHeaderFile(string section, string key, string value);
         QString readFromHeaderFile(string section, string var);
         string readFromGPSInfoFile(string var);
-        string readFromBearingsFile(string var, int offset, int strsize);
 
     private:
 };

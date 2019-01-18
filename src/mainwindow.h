@@ -8,6 +8,8 @@
 #include "datetime.h"
 #include "header_arm_files.h"
 
+#include <math.h>
+
 
 namespace Ui {
 class MainWindow;
@@ -26,7 +28,7 @@ private slots:
 
     void on_receiveNodePositionsButton_clicked();
 
-    void on_receiveBearingsButton_clicked();
+    void on_calcBearingDistanceButton_clicked();
 
     void on_showVideoButton_clicked();
 
@@ -40,6 +42,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    string nodenumstr;
     int m_counter;
     int experiment_state;
 
@@ -61,6 +64,14 @@ private:
     time_t stopUnixTime;
     time_t currentUnixTime;
 
+    class Point
+    {
+        public:
+            double lat;
+            double lon;
+            double ht;
+    };
+
     HeaderArmFiles headerarmfiles;
     VideoConnectionManager videoRecorder;
 
@@ -73,13 +84,22 @@ private:
 
     void receiveNodePosition(int node_num);
 
-    void receiveBearings(int node_num);
+
+    void calcBearingDistance(int node_num);
+
+    double toRadians (double degs);
+    double toDegrees (double rads);
+    double bearingTo(Point node, Point target);
+
+    double calcDistance(Point node, Point target);
+
 
     QString getCountDownTime(time_t timeLeft);
 
     string replaceCharsinStr(string str_in, char ch_in, char ch_out);
 
-    void checkCountdown(void);
+    int calcExperimentLength(void);
+    bool checkCountdown(void);
 
 };
 

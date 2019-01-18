@@ -28,7 +28,8 @@ class Datetime
         string getNowInMinutes(void);
         string getNowInSeconds(void);
         QString getCountDownTime(time_t timeLeft);
-        time_t convertToUnixTime(string timestamp);
+        struct tm convertToStructTm(string timestamp);
+        time_t convertToUnixTime(struct tm tm1);
 };
 
 
